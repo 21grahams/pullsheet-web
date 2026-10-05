@@ -1,0 +1,38 @@
+import type { Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState, type ReactNode } from 'react';
+import { supabase } from '../../lib/supabase';
+import { AuthContext, friendlyAuthError, type AuthContextValue } from './authContext';
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
+    });
+    // Fires on login, logout, token refresh, and when a session expires or
+    // is revoked (which sends the app back to the login screen).
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  const value: AuthContextValue = {
+    session,
+    loading,
+    async signIn(email, password) {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      return error ? friendlyAuthError(error.message) : null;
+    },
+    async signOut() {
+      await supabase.auth.signOut();
+      // Drop every piece of loaded data so nothing lingers on the device.
+      queryClient.clear();
+    },
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
