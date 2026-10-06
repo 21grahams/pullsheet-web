@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { tokens } from '../theme/tokens';
 import { OfflineBanner } from './OfflineBanner';
+import { PracticeBanner } from './PracticeBanner';
 import { PullToRefresh } from './PullToRefresh';
 import { ScrollTopButton } from './ScrollTopButton';
 import { TABS } from './tabs';
@@ -40,6 +41,7 @@ export function AppShell() {
           pt: 'env(safe-area-inset-top)',
         }}
       >
+        <PracticeBanner />
         <Box sx={{ px: 2, pt: 1.5, pb: 0.5 }}>
           <Wordmark />
         </Box>

@@ -1,6 +1,7 @@
 import { Alert, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
 import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router';
+import { PracticeBanner } from '../../components/PracticeBanner';
 import { Wordmark } from '../../components/Wordmark';
 import { useAuth } from './authContext';
 
@@ -37,6 +38,7 @@ export function LoginPage() {
     >
       <Box component="form" onSubmit={handleSubmit} noValidate sx={{ width: '100%', maxWidth: 380 }}>
         <Stack spacing={2.5}>
+          <PracticeBanner />
           <Box sx={{ textAlign: 'center', mb: 1 }}>
             <Wordmark />
           </Box>
