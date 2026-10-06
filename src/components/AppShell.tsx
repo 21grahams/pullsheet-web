@@ -1,7 +1,10 @@
 import { Box, Tab, Tabs } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { tokens } from '../theme/tokens';
 import { OfflineBanner } from './OfflineBanner';
+import { PullToRefresh } from './PullToRefresh';
+import { ScrollTopButton } from './ScrollTopButton';
 import { TABS } from './tabs';
 import { Wordmark } from './Wordmark';
 
@@ -11,10 +14,23 @@ export function AppShell() {
   const navigate = useNavigate();
   const current = TABS.find((t) => pathname.startsWith(t.path))?.path ?? false;
 
+  // The pull-to-refresh pill sits just under the header, whose height varies
+  // (notch, offline banner), so measure it.
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(120);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() => setHeaderHeight(el.offsetHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <Box sx={{ minHeight: '100dvh' }}>
       <Box
         component="header"
+        ref={headerRef}
         sx={{
           position: 'sticky',
           top: 0,
@@ -49,6 +65,8 @@ export function AppShell() {
       >
         <Outlet />
       </Box>
+      <PullToRefresh top={headerHeight} />
+      <ScrollTopButton />
     </Box>
   );
 }
