@@ -11,6 +11,7 @@ import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary, type SealedGroup } from '../../lib/sealedGroups';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
+import { RemoveItemDialog } from '../items/RemoveItemDialog';
 
 function GroupHeader({
   group,
@@ -80,7 +81,17 @@ function GroupHeader({
   );
 }
 
-function SealedCard({ item, year, onEdit }: { item: SealedItem; year: number; onEdit: () => void }) {
+function SealedCard({
+  item,
+  year,
+  onEdit,
+  onRemove,
+}: {
+  item: SealedItem;
+  year: number;
+  onEdit: () => void;
+  onRemove: () => void;
+}) {
   const isLong = item.holdStatus === 'long';
   return (
     <ItemCard
@@ -103,7 +114,7 @@ function SealedCard({ item, year, onEdit }: { item: SealedItem; year: number; on
             </CardButton>
           )}
           {item.holdStatus !== 'historical' && <CardButton disabled>Move</CardButton>}
-          <CardButton variant="danger" disabled>
+          <CardButton variant="danger" onClick={onRemove}>
             Remove
           </CardButton>
         </>
@@ -119,6 +130,7 @@ export function SealedPage() {
   const [allCollapsed, setAllCollapsed] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<SealedItem | null>(null);
+  const [removing, setRemoving] = useState<SealedItem | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
@@ -148,6 +160,10 @@ export function SealedPage() {
   const addSheet = (
     <>
       <AddButton label="Add sealed product" onClick={() => setAddOpen(true)} />
+      <RemoveItemDialog
+        target={removing && { kind: 'sealed', item: removing }}
+        onClose={() => setRemoving(null)}
+      />
       <ItemFormSheet
         kind="sealed"
         open={addOpen}
@@ -209,6 +225,7 @@ export function SealedPage() {
                     item={item}
                     year={context.data.year}
                     onEdit={() => setEditing(item)}
+                    onRemove={() => setRemoving(item)}
                   />
                 ))}
               </Box>

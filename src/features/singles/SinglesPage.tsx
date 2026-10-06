@@ -17,6 +17,7 @@ import {
 } from '../../lib/singlesFilter';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
+import { RemoveItemDialog } from '../items/RemoveItemDialog';
 import { SinglesFilterSheet } from './SinglesFilterSheet';
 
 /** "Qty: 1 · 10/05/2026 · NM · [PULLED]" */
@@ -95,6 +96,7 @@ export function SinglesPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<Single | null>(null);
+  const [removing, setRemoving] = useState<Single | null>(null);
 
   const all = useMemo(() => singles.data ?? [], [singles.data]);
   const shown = useMemo(() => filterSingles(all, search, filters), [all, search, filters]);
@@ -245,7 +247,7 @@ export function SinglesPage() {
                     <CardButton variant="green" disabled>
                       Mark Sold
                     </CardButton>
-                    <CardButton variant="danger" disabled>
+                    <CardButton variant="danger" onClick={() => setRemoving(s)}>
                       Remove
                     </CardButton>
                   </>
@@ -269,6 +271,11 @@ export function SinglesPage() {
         editing={editing}
         onClose={() => setEditing(null)}
         today={context.data.today}
+      />
+
+      <RemoveItemDialog
+        target={removing && { kind: 'single', item: removing }}
+        onClose={() => setRemoving(null)}
       />
 
       <SinglesFilterSheet
