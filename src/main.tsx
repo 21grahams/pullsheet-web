@@ -12,6 +12,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router';
 import { App } from './App';
+import { NotifyProvider } from './components/NotifyProvider';
 import { AuthProvider } from './features/auth/AuthProvider';
 import { theme } from './theme/theme';
 
@@ -32,7 +33,9 @@ createRoot(document.getElementById('root')!).render(
         {/* HashRouter (#/singles) so GitHub Pages needs no server rewrites. */}
         <HashRouter>
           <AuthProvider>
-            <App />
+            <NotifyProvider>
+              <App />
+            </NotifyProvider>
           </AuthProvider>
         </HashRouter>
       </QueryClientProvider>

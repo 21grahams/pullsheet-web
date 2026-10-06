@@ -1,5 +1,263 @@
-import { Placeholder } from '../../components/Placeholder';
+import { Box, Button } from '@mui/material';
+import { useMemo, useState } from 'react';
+import type { Single } from '../../api/types';
+import { CardButton } from '../../components/CardActions';
+import { ItemCard } from '../../components/ItemCard';
+import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
+import { useAppContext, useSingles } from '../../hooks/queries';
+import { cardNumbers, cardsLabel, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
+import { formatDate, formatMoney, formatSignedPct } from '../../lib/format';
+import {
+  activeFilterCount,
+  emptyFilters,
+  filterOptions,
+  filterSingles,
+  type SinglesFilters,
+} from '../../lib/singlesFilter';
+import { fonts, tokens } from '../../theme/tokens';
+import { SinglesFilterSheet } from './SinglesFilterSheet';
+
+/** "Qty: 1 · 10/05/2026 · NM · [PULLED]" */
+function Subtitle({ single }: { single: Single }) {
+  const parts = [`Qty: ${single.quantity}`, formatDate(single.purchaseDate), single.condition].filter(
+    Boolean,
+  );
+  return (
+    <>
+      {parts.join(' · ')}
+      {single.extra && (
+        <>
+          {' · '}
+          <Box
+            component="span"
+            sx={{
+              px: 0.5,
+              border: `1px solid ${tokens.gold}`,
+              borderRadius: '4px',
+              color: tokens.gold,
+              fontSize: 9,
+              letterSpacing: '0.5px',
+              verticalAlign: 'middle',
+            }}
+          >
+            {single.extra}
+          </Box>
+        </>
+      )}
+    </>
+  );
+}
+
+/** "Marill – Southern Islands": the card title, and what the copy icon copies. */
+function cardTitle(single: Single): string {
+  return single.setName ? `${single.pokemon} – ${single.setName}` : single.pokemon;
+}
+
+function SummaryTile({
+  label,
+  value,
+  color,
+  sub,
+}: {
+  label: string;
+  value: string;
+  color: string;
+  sub: string;
+}) {
+  return (
+    <Box
+      sx={{
+        backgroundColor: tokens.surface,
+        border: `1px solid ${tokens.border}`,
+        borderRadius: `${tokens.radius}px`,
+        p: 1.75,
+        minWidth: 0,
+      }}
+    >
+      <Box
+        sx={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: tokens.text3, mb: 0.75 }}
+      >
+        {label}
+      </Box>
+      <Box sx={{ fontFamily: fonts.mono, fontSize: 22, fontWeight: 500, color }}>{value}</Box>
+      <Box sx={{ fontFamily: fonts.mono, fontSize: 11, color: tokens.text3, mt: '3px' }}>{sub}</Box>
+    </Box>
+  );
+}
 
 export function SinglesPage() {
-  return <Placeholder title="Singles" note="Your cards arrive in Phase 2." />;
+  const singles = useSingles();
+  const context = useAppContext();
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<SinglesFilters>(emptyFilters);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const all = useMemo(() => singles.data ?? [], [singles.data]);
+  const shown = useMemo(() => filterSingles(all, search, filters), [all, search, filters]);
+  const options = useMemo(() => filterOptions(all), [all]);
+  const filterCount = activeFilterCount(filters);
+
+  if (singles.isPending || context.isPending) return <LoadingState />;
+  if (singles.isError) return <ErrorState error={singles.error} onRetry={() => singles.refetch()} />;
+  if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
+
+  const sum = totals(shown);
+
+  return (
+    <Box>
+      {/* Search + Filter */}
+      <Box sx={{ display: 'flex', gap: 1, mb: 1.75 }}>
+        <Box sx={{ position: 'relative', flex: 1 }}>
+          <Box
+            component="input"
+            type="search"
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+            placeholder="Search cards..."
+            sx={{
+              width: '100%',
+              backgroundColor: tokens.surface2,
+              border: `1px solid ${tokens.border}`,
+              borderRadius: '10px',
+              p: '10px 34px 10px 13px',
+              color: tokens.text,
+              fontFamily: 'inherit',
+              fontSize: 16,
+              outline: 'none',
+              WebkitAppearance: 'none',
+              '&:focus': { borderColor: tokens.gold },
+              '&::-webkit-search-cancel-button': { display: 'none' },
+            }}
+          />
+          {search && (
+            <Box
+              component="button"
+              aria-label="Clear search"
+              onClick={() => setSearch('')}
+              sx={{
+                position: 'absolute',
+                right: 6,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: tokens.text3,
+                fontSize: 15,
+                p: 0.75,
+                cursor: 'pointer',
+              }}
+            >
+              ✕
+            </Box>
+          )}
+        </Box>
+        <Box
+          component="button"
+          onClick={() => setFilterOpen(true)}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.75,
+            backgroundColor: tokens.surface2,
+            border: `1px solid ${filterCount ? tokens.gold : tokens.border}`,
+            color: filterCount ? tokens.gold : tokens.text,
+            borderRadius: '10px',
+            px: 1.75,
+            fontSize: 14,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          ⚙ Filter
+          {filterCount > 0 && (
+            <Box
+              component="span"
+              sx={{
+                backgroundColor: tokens.gold,
+                color: tokens.bg,
+                borderRadius: '9px',
+                fontSize: 11,
+                fontWeight: 700,
+                px: 0.75,
+                minWidth: 16,
+                textAlign: 'center',
+              }}
+            >
+              {filterCount}
+            </Box>
+          )}
+        </Box>
+      </Box>
+
+      {all.length === 0 ? (
+        <EmptyState icon="🃏">No singles yet. Tap + to add.</EmptyState>
+      ) : shown.length === 0 ? (
+        <EmptyState icon="🔍">
+          <Box sx={{ mb: 1.25 }}>No cards match your search/filters.</Box>
+          <Button
+            variant="outlined"
+            size="small"
+            color="inherit"
+            onClick={() => {
+              setSearch('');
+              setFilters(emptyFilters);
+            }}
+          >
+            Clear Search & Filters
+          </Button>
+        </EmptyState>
+      ) : (
+        <>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25, mt: 1, mb: 2.5 }}>
+            <SummaryTile
+              label="Total Value"
+              value={formatMoney(sum.totalValue)}
+              color={tokens.gold}
+              sub={cardsLabel(shown, all)}
+            />
+            <SummaryTile
+              label="Unrealized Gain"
+              value={formatMoney(sum.gain)}
+              color={sum.gain >= 0 ? tokens.green : tokens.red}
+              sub={`${formatSignedPct(sum.gainPct)} return`}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {shown.map((s) => (
+              <ItemCard
+                key={s.id}
+                title={cardTitle(s)}
+                subtitle={<Subtitle single={s} />}
+                copyText={cardTitle(s)}
+                numbers={cardNumbers(s)}
+                feesLabel={pasFeesLabel(s.fees, s.feeUnits)}
+                quarters={quarterBoxes(s.quarterUnitValues, s.quantity, s.totalCost, context.data.year)}
+                actions={
+                  // Editing arrives in Phase 3; until then the old app does the writing.
+                  <>
+                    <CardButton disabled>Edit</CardButton>
+                    <CardButton variant="green" disabled>
+                      Mark Sold
+                    </CardButton>
+                    <CardButton variant="danger" disabled>
+                      Remove
+                    </CardButton>
+                  </>
+                }
+              />
+            ))}
+          </Box>
+        </>
+      )}
+
+      <SinglesFilterSheet
+        open={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        filters={filters}
+        onApply={setFilters}
+        options={options}
+      />
+    </Box>
+  );
 }
