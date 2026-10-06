@@ -15,6 +15,7 @@ interface ItemCardProps {
   feesLabel: string | null;
   /** Q1–Q4 boxes; omitted for Short Hold items. */
   quarters?: QuarterBox[];
+  onQuarterClick?: (q: QuarterBox) => void;
   actions?: ReactNode;
 }
 
@@ -53,12 +54,21 @@ function GainCell({ amount, pct }: { amount: number; pct: number }) {
   );
 }
 
-function QuarterGrid({ quarters }: { quarters: QuarterBox[] }) {
+function QuarterGrid({
+  quarters,
+  onQuarterClick,
+}: {
+  quarters: QuarterBox[];
+  onQuarterClick?: (q: QuarterBox) => void;
+}) {
   return (
     <Box sx={{ ...divider, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0.75 }}>
       {quarters.map((q) => (
         <Box
           key={q.quarter}
+          component={onQuarterClick ? 'button' : 'div'}
+          type={onQuarterClick ? 'button' : undefined}
+          onClick={onQuarterClick ? () => onQuarterClick(q) : undefined}
           sx={{
             backgroundColor: tokens.surface2,
             borderRadius: '6px',
@@ -66,6 +76,12 @@ function QuarterGrid({ quarters }: { quarters: QuarterBox[] }) {
             py: 0.75,
             border: `1px solid ${q.active ? tokens.gold : 'transparent'}`,
             minWidth: 0,
+            textAlign: 'left',
+            color: 'inherit',
+            fontFamily: 'inherit',
+            cursor: onQuarterClick ? 'pointer' : 'default',
+            transition: 'border-color 0.15s',
+            '&:hover': onQuarterClick ? { borderColor: tokens.gold } : {},
           }}
         >
           <Box sx={{ fontSize: 9, letterSpacing: '1.5px', textTransform: 'uppercase', color: tokens.text3 }}>
@@ -106,6 +122,7 @@ export function ItemCard({
   numbers,
   feesLabel,
   quarters,
+  onQuarterClick,
   actions,
 }: ItemCardProps) {
   const notify = useNotify();
@@ -210,7 +227,7 @@ export function ItemCard({
         <GainCell amount={numbers.profit80} pct={numbers.profit80Pct} />
       </Box>
 
-      {quarters && <QuarterGrid quarters={quarters} />}
+      {quarters && <QuarterGrid quarters={quarters} onQuarterClick={onQuarterClick} />}
 
       {actions && <Box sx={{ display: 'flex', gap: 0.75, mt: 1.25, flexWrap: 'wrap' }}>{actions}</Box>}
     </Box>

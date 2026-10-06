@@ -11,6 +11,7 @@ import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary, type SealedGroup } from '../../lib/sealedGroups';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
+import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
 
 function GroupHeader({
@@ -86,11 +87,13 @@ function SealedCard({
   year,
   onEdit,
   onRemove,
+  onQuarter,
 }: {
   item: SealedItem;
   year: number;
   onEdit: () => void;
   onRemove: () => void;
+  onQuarter: (quarter: 1 | 2 | 3 | 4) => void;
 }) {
   const isLong = item.holdStatus === 'long';
   return (
@@ -105,6 +108,7 @@ function SealedCard({
       quarters={
         isLong ? quarterBoxes(item.quarterUnitValues, item.quantity, item.totalCost, year) : undefined
       }
+      onQuarterClick={isLong ? (q) => onQuarter(q.quarter) : undefined}
       actions={
         <>
           <CardButton onClick={onEdit}>Edit</CardButton>
@@ -131,6 +135,7 @@ export function SealedPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<SealedItem | null>(null);
   const [removing, setRemoving] = useState<SealedItem | null>(null);
+  const [quarterTarget, setQuarterTarget] = useState<QuarterTarget | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
@@ -160,6 +165,7 @@ export function SealedPage() {
   const addSheet = (
     <>
       <AddButton label="Add sealed product" onClick={() => setAddOpen(true)} />
+      <QuarterSheet target={quarterTarget} onClose={() => setQuarterTarget(null)} />
       <RemoveItemDialog
         target={removing && { kind: 'sealed', item: removing }}
         onClose={() => setRemoving(null)}
@@ -226,6 +232,15 @@ export function SealedPage() {
                     year={context.data.year}
                     onEdit={() => setEditing(item)}
                     onRemove={() => setRemoving(item)}
+                    onQuarter={(quarter) =>
+                      setQuarterTarget({
+                        item: { sealedItemId: item.id },
+                        name: item.name,
+                        quarter,
+                        quantity: item.quantity,
+                        unitValue: item.quarterUnitValues[quarter - 1] ?? null,
+                      })
+                    }
                   />
                 ))}
               </Box>

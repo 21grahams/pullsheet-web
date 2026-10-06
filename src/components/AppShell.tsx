@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { tokens } from '../theme/tokens';
 import { OfflineBanner } from './OfflineBanner';
@@ -14,6 +14,22 @@ export function AppShell() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const current = TABS.find((t) => pathname.startsWith(t.path))?.path ?? false;
+
+  const scrollByTab = useRef<Record<string, number>>({});
+  const tabRef = useRef(pathname);
+  useEffect(() => {
+    window.history.scrollRestoration = 'manual';
+    const onScroll = () => {
+      scrollByTab.current[tabRef.current] = window.scrollY;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  useLayoutEffect(() => {
+    if (tabRef.current === pathname) return;
+    tabRef.current = pathname;
+    window.scrollTo(0, scrollByTab.current[pathname] ?? 0);
+  }, [pathname]);
 
   // The pull-to-refresh pill sits just under the header, whose height varies
   // (notch, offline banner), so measure it.

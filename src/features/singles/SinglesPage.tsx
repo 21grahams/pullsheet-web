@@ -17,6 +17,7 @@ import {
 } from '../../lib/singlesFilter';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
+import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
 import { SinglesFilterSheet } from './SinglesFilterSheet';
 
@@ -97,6 +98,7 @@ export function SinglesPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<Single | null>(null);
   const [removing, setRemoving] = useState<Single | null>(null);
+  const [quarterTarget, setQuarterTarget] = useState<QuarterTarget | null>(null);
 
   const all = useMemo(() => singles.data ?? [], [singles.data]);
   const shown = useMemo(() => filterSingles(all, search, filters), [all, search, filters]);
@@ -241,6 +243,15 @@ export function SinglesPage() {
                 numbers={cardNumbers(s)}
                 feesLabel={pasFeesLabel(s.fees, s.feeUnits)}
                 quarters={quarterBoxes(s.quarterUnitValues, s.quantity, s.totalCost, context.data.year)}
+                onQuarterClick={(q) =>
+                  setQuarterTarget({
+                    item: { singleId: s.id },
+                    name: cardTitle(s),
+                    quarter: q.quarter,
+                    quantity: s.quantity,
+                    unitValue: s.quarterUnitValues[q.quarter - 1] ?? null,
+                  })
+                }
                 actions={
                   <>
                     <CardButton onClick={() => setEditing(s)}>Edit</CardButton>
@@ -273,6 +284,7 @@ export function SinglesPage() {
         today={context.data.today}
       />
 
+      <QuarterSheet target={quarterTarget} onClose={() => setQuarterTarget(null)} />
       <RemoveItemDialog
         target={removing && { kind: 'single', item: removing }}
         onClose={() => setRemoving(null)}
