@@ -55,6 +55,8 @@ Rules:
 - **Show code/diffs before committing**, even locally. **Ask before every push.**
 - Desktop and iPhone both matter; say when something needs a real-device check.
 - Small, reviewable steps.
+- **Minimal comments.** Only add one when the code would mislead without it (a non-obvious
+  "why"). No comments that just describe what the code does.
 
 ## Status
 

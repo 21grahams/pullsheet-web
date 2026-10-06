@@ -76,7 +76,7 @@ export function PullToRefresh({ top }: { top: number }) {
         left: '50%',
         transform: `translateX(-50%) translateY(${visible ? 12 : -60}px)`,
         transition: 'transform 0.2s',
-        zIndex: 99,
+        zIndex: 101,
         backgroundColor: tokens.surface,
         border: `1px solid ${tokens.border}`,
         borderRadius: '20px',
