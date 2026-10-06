@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { tokens } from '../theme/tokens';
 
-const isLive = import.meta.env.VITE_SUPABASE_URL.includes('.supabase.co');
+const isLive = (import.meta.env.VITE_SUPABASE_URL ?? '').includes('.supabase.co');
 
 export function PracticeBanner() {
   if (isLive) return null;
