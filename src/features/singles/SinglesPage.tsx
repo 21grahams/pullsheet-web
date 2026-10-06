@@ -97,9 +97,11 @@ export function SinglesPage() {
   const options = useMemo(() => filterOptions(all), [all]);
   const filterCount = activeFilterCount(filters);
 
-  if (singles.isPending || context.isPending) return <LoadingState />;
-  if (singles.isError) return <ErrorState error={singles.error} onRetry={() => singles.refetch()} />;
-  if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
+  if (!singles.data || !context.data) {
+    if (singles.isError) return <ErrorState error={singles.error} onRetry={() => singles.refetch()} />;
+    if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
+    return <LoadingState />;
+  }
 
   const sum = totals(shown);
 

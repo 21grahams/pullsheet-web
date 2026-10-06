@@ -119,9 +119,11 @@ export function SealedPage() {
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
-  if (sealed.isPending || context.isPending) return <LoadingState />;
-  if (sealed.isError) return <ErrorState error={sealed.error} onRetry={() => sealed.refetch()} />;
-  if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
+  if (!sealed.data || !context.data) {
+    if (sealed.isError) return <ErrorState error={sealed.error} onRetry={() => sealed.refetch()} />;
+    if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
+    return <LoadingState />;
+  }
   if (groups.length === 0) return <EmptyState icon="📦">No sealed product yet.</EmptyState>;
 
   // Toggling groups by hand keeps the button honest: once every group is

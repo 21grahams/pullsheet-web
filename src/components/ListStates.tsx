@@ -19,12 +19,18 @@ export function EmptyState({ icon, children }: { icon: string; children: ReactNo
   );
 }
 
+function friendlyLoadError(error: unknown): string {
+  const message = error instanceof Error ? error.message : '';
+  if (/load failed|failed to fetch|network/i.test(message)) {
+    return "Can't reach PullSheet. Check your connection and try again.";
+  }
+  return `Couldn't load this. ${message}`;
+}
+
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   return (
     <EmptyState icon="⚠️">
-      <Box sx={{ color: tokens.text2, mb: 1.5 }}>
-        Couldn't load this. {error instanceof Error ? error.message : ''}
-      </Box>
+      <Box sx={{ color: tokens.text2, mb: 1.5 }}>{friendlyLoadError(error)}</Box>
       <Button variant="outlined" size="small" onClick={onRetry}>
         Try again
       </Button>

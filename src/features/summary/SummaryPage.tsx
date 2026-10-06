@@ -126,9 +126,11 @@ export function SummaryPage() {
   const summary = useSummary();
   const holds = useCompletedHolds();
 
-  if (summary.isPending || holds.isPending) return <LoadingState />;
-  if (summary.isError) return <ErrorState error={summary.error} onRetry={() => summary.refetch()} />;
-  if (holds.isError) return <ErrorState error={holds.error} onRetry={() => holds.refetch()} />;
+  if (!summary.data || !holds.data) {
+    if (summary.isError) return <ErrorState error={summary.error} onRetry={() => summary.refetch()} />;
+    if (holds.isError) return <ErrorState error={holds.error} onRetry={() => holds.refetch()} />;
+    return <LoadingState />;
+  }
 
   const s = summary.data;
   const p = s.portfolio;

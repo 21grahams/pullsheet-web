@@ -1,5 +1,5 @@
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, onlineManager } from '@tanstack/react-query';
 import { isLiveDatabase } from './environment';
 
 const WEEK = 7 * 24 * 60 * 60 * 1000;
@@ -18,3 +18,7 @@ export const cachePersister = createSyncStoragePersister({
 });
 
 export const persistOptions = { persister: cachePersister, maxAge: WEEK, buster: __APP_VERSION__ };
+
+// TanStack only learns about offline from 'offline' events, so an app opened
+// already offline would think it's online and attempt (failing) refreshes.
+onlineManager.setOnline(navigator.onLine);

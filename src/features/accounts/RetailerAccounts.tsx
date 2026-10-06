@@ -112,8 +112,13 @@ function Group({ group }: { group: RetailerGroup }) {
 /** The Retailer Accounts list inside Settings. */
 export function RetailerAccounts() {
   const accounts = useAccounts();
-  if (accounts.isPending) return <LoadingState />;
-  if (accounts.isError) return <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} />;
+  if (!accounts.data) {
+    return accounts.isError ? (
+      <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} />
+    ) : (
+      <LoadingState />
+    );
+  }
 
   const groups = groupAccounts(accounts.data);
   if (groups.length === 0) {
