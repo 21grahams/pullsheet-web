@@ -1,7 +1,9 @@
-import { Box, Button, Paper, Typography } from '@mui/material';
-import { useState } from 'react';
+import { Box, Button } from '@mui/material';
+import { useState, type ReactNode } from 'react';
+import { CardButton } from '../../components/CardActions';
 import { tokens } from '../../theme/tokens';
 import { useAuth } from '../auth/authContext';
+import { RetailerAccounts } from './RetailerAccounts';
 
 function formatBuiltAt(iso: string): string {
   return new Date(iso).toLocaleString('en-US', {
@@ -14,62 +16,107 @@ function formatBuiltAt(iso: string): string {
   });
 }
 
-function SectionLabel({ children }: { children: string }) {
+/** A Settings section with the old app's small uppercase label. */
+function Section({ label, action, children }: { label: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <Typography
-      sx={{
-        fontSize: 12,
-        letterSpacing: '0.15em',
-        textTransform: 'uppercase',
-        color: tokens.text2,
-        mb: 1,
-        mt: 3,
-      }}
-    >
+    <Box sx={{ mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: 11,
+          letterSpacing: '2px',
+          textTransform: 'uppercase',
+          color: tokens.text3,
+          mb: 1.25,
+        }}
+      >
+        <span>{label}</span>
+        {action}
+      </Box>
       {children}
-    </Typography>
+    </Box>
   );
 }
 
-// Replaces the old "Google Sheets connection" box. Retailer Accounts
-// arrive in Phase 2.
+function Row({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      sx={{
+        backgroundColor: tokens.surface,
+        border: `1px solid ${tokens.border}`,
+        borderRadius: `${tokens.radius}px`,
+        p: 1.75,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 2,
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
+// Same sections as the old app, with the "Google Sheets Connection" and
+// "How to Connect" boxes replaced by the logged-in account.
 export function SettingsPage() {
   const { session, signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
 
   return (
-    <Box>
-      <SectionLabel>Account</SectionLabel>
-      <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ fontWeight: 600 }}>Logged in</Typography>
-          <Typography variant="body2" color="text.secondary" noWrap>
-            {session?.user.email}
-          </Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          color="error"
-          disabled={signingOut}
-          onClick={async () => {
-            setSigningOut(true);
-            await signOut();
-          }}
-        >
-          Log out
-        </Button>
-      </Paper>
+    <Box sx={{ mt: 1 }}>
+      <Section label="Account">
+        <Row>
+          <Box sx={{ minWidth: 0 }}>
+            <Box sx={{ fontSize: 14 }}>Logged in</Box>
+            <Box
+              sx={{
+                fontSize: 12,
+                color: tokens.text3,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {session?.user.email}
+            </Box>
+          </Box>
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            disabled={signingOut}
+            onClick={async () => {
+              setSigningOut(true);
+              await signOut();
+            }}
+          >
+            Log out
+          </Button>
+        </Row>
+      </Section>
 
-      <SectionLabel>About</SectionLabel>
-      <Paper sx={{ p: 2 }}>
-        <Typography sx={{ fontWeight: 600 }}>PullSheet</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Pokémon collection portfolio tracker
-        </Typography>
-        <Typography variant="caption" sx={{ display: 'block', mt: 1, color: tokens.text3 }}>
-          Version {__APP_VERSION__} · built {formatBuiltAt(__BUILT_AT__)}
-        </Typography>
-      </Paper>
+      <Section
+        label="Retailer Accounts"
+        // Adding accounts arrives in Phase 3.
+        action={<CardButton disabled>+ Add</CardButton>}
+      >
+        <RetailerAccounts />
+      </Section>
+
+      <Section label="About">
+        <Row>
+          <Box>
+            <Box sx={{ fontSize: 14 }}>PullSheet</Box>
+            <Box sx={{ fontSize: 12, color: tokens.text3 }}>Pokémon collection portfolio tracker</Box>
+            <Box sx={{ fontSize: 11, color: tokens.text3, mt: 0.75 }}>
+              Version {__APP_VERSION__} · built {formatBuiltAt(__BUILT_AT__)}
+            </Box>
+          </Box>
+        </Row>
+      </Section>
     </Box>
   );
 }
