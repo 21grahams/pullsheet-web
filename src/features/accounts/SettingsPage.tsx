@@ -3,6 +3,17 @@ import { useState } from 'react';
 import { tokens } from '../../theme/tokens';
 import { useAuth } from '../auth/authContext';
 
+function formatBuiltAt(iso: string): string {
+  return new Date(iso).toLocaleString('en-US', {
+    timeZone: 'America/Denver',
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 function SectionLabel({ children }: { children: string }) {
   return (
     <Typography
@@ -54,6 +65,9 @@ export function SettingsPage() {
         <Typography sx={{ fontWeight: 600 }}>PullSheet</Typography>
         <Typography variant="body2" color="text.secondary">
           Pokémon collection portfolio tracker
+        </Typography>
+        <Typography variant="caption" sx={{ display: 'block', mt: 1, color: tokens.text3 }}>
+          Version {__APP_VERSION__} · built {formatBuiltAt(__BUILT_AT__)}
         </Typography>
       </Paper>
     </Box>

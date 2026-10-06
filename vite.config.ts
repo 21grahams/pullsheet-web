@@ -10,8 +10,17 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const base = env.VITE_BASE || '/pullsheet-web/';
 
+  // Shown in Settings → About so you can tell which version a device runs.
+  // GITHUB_SHA is set by GitHub Actions; local builds show "dev".
+  const version = (process.env.GITHUB_SHA ?? 'dev').slice(0, 7);
+  const builtAt = new Date().toISOString();
+
   return {
     base,
+    define: {
+      __APP_VERSION__: JSON.stringify(version),
+      __BUILT_AT__: JSON.stringify(builtAt),
+    },
     plugins: [
       react(),
       VitePWA({
