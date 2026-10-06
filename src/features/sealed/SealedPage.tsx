@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import { useMemo, useState } from 'react';
 import type { SealedItem } from '../../api/types';
+import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
@@ -9,6 +10,7 @@ import { cardNumbers, pasFeesLabel, quarterBoxes } from '../../lib/cardMath';
 import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary, type SealedGroup } from '../../lib/sealedGroups';
 import { fonts, tokens } from '../../theme/tokens';
+import { ItemFormSheet } from '../items/ItemFormSheet';
 
 function GroupHeader({
   group,
@@ -116,6 +118,7 @@ export function SealedPage() {
   const context = useAppContext();
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
   const [allCollapsed, setAllCollapsed] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
@@ -124,7 +127,6 @@ export function SealedPage() {
     if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
     return <LoadingState />;
   }
-  if (groups.length === 0) return <EmptyState icon="📦">No sealed product yet.</EmptyState>;
 
   // Toggling groups by hand keeps the button honest: once every group is
   // collapsed it offers "Expand All", once every group is expanded it offers
@@ -141,6 +143,27 @@ export function SealedPage() {
     const next = !allCollapsed;
     setAllCollapsed(next);
     setCollapsed(Object.fromEntries(groups.map((g) => [g.holdId, next])));
+  }
+
+  const addSheet = (
+    <>
+      <AddButton label="Add sealed product" onClick={() => setAddOpen(true)} />
+      <ItemFormSheet
+        kind="sealed"
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        today={context.data.today}
+      />
+    </>
+  );
+
+  if (groups.length === 0) {
+    return (
+      <>
+        <EmptyState icon="📦">No sealed product yet.</EmptyState>
+        {addSheet}
+      </>
+    );
   }
 
   return (
@@ -181,6 +204,7 @@ export function SealedPage() {
           </Box>
         );
       })}
+      {addSheet}
     </Box>
   );
 }

@@ -8,3 +8,6 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   "unlock to reveal" belongs in the future Swift app, where it's native.
 - **Comment cleanup pass.** After cutover, go through the codebase and remove every comment
   that isn't essential, keeping only non-obvious "why" notes (workarounds, security rules).
+- **Enforce valid conditions in the database.** After cutover (when the old app's free-text name
+  field can no longer write), add a database rule matching the app's: NM/LP/MP/HP/DMG, or
+  PSA/BGS/CGC/SGC/TAG with a grade from 1 to 10 in half steps.

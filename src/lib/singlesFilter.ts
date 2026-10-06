@@ -21,9 +21,12 @@ export const emptyFilters: SinglesFilters = {
   dateTo: '',
 };
 
+export const newestFirst = <T extends { id: number }>(items: readonly T[]): T[] =>
+  [...items].sort((a, b) => b.id - a.id);
+
 export function filterSingles(singles: readonly Single[], search: string, f: SinglesFilters): Single[] {
   const q = search.trim().toLowerCase();
-  return singles.filter((s) => {
+  return newestFirst(singles).filter((s) => {
     if (q && !s.displayName.toLowerCase().includes(q)) return false;
     if (f.pokemon && s.pokemon !== f.pokemon) return false;
     if (f.setName && s.setName !== f.setName) return false;

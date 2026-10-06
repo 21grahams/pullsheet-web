@@ -1,9 +1,9 @@
-// Groups sealed items into holds for the Sealed tab: Long Hold first, then
-// Short Holds newest to oldest (the API already returns items in that order).
+// Long Hold first, then Short Holds newest to oldest; items newest-added first.
 
 import type { HoldStatus, SealedItem } from '../api/types';
 import { formatMoney } from './format';
 import { totals } from './cardMath';
+import { newestFirst } from './singlesFilter';
 
 export interface SealedGroup {
   holdId: number;
@@ -22,10 +22,11 @@ export function groupSealed(items: readonly SealedItem[]): SealedGroup[] {
     }
     group.items.push(item);
   }
-  // Defensive re-sort; the API order should already be this.
   const rank = (g: SealedGroup) => (g.status === 'long' ? -1 : 0);
   const number = (g: SealedGroup) => g.items[0]?.holdNumber ?? 0;
-  return [...groups.values()].sort((a, b) => rank(a) - rank(b) || number(b) - number(a));
+  return [...groups.values()]
+    .sort((a, b) => rank(a) - rank(b) || number(b) - number(a))
+    .map((g) => ({ ...g, items: newestFirst(g.items) }));
 }
 
 /**

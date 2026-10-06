@@ -1,6 +1,7 @@
 import { Box, Button } from '@mui/material';
 import { useMemo, useState } from 'react';
 import type { Single } from '../../api/types';
+import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
@@ -15,6 +16,7 @@ import {
   type SinglesFilters,
 } from '../../lib/singlesFilter';
 import { fonts, tokens } from '../../theme/tokens';
+import { ItemFormSheet } from '../items/ItemFormSheet';
 import { SinglesFilterSheet } from './SinglesFilterSheet';
 
 /** "Qty: 1 · 10/05/2026 · NM · [PULLED]" */
@@ -91,6 +93,7 @@ export function SinglesPage() {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<SinglesFilters>(emptyFilters);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   const all = useMemo(() => singles.data ?? [], [singles.data]);
   const shown = useMemo(() => filterSingles(all, search, filters), [all, search, filters]);
@@ -252,6 +255,14 @@ export function SinglesPage() {
           </Box>
         </>
       )}
+
+      <AddButton label="Add single card" onClick={() => setAddOpen(true)} />
+      <ItemFormSheet
+        kind="single"
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        today={context.data.today}
+      />
 
       <SinglesFilterSheet
         open={filterOpen}

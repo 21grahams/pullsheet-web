@@ -44,7 +44,7 @@ describe('groupSealed', () => {
       'Short Hold 13',
       'Short Hold 1',
     ]);
-    expect(groups[0]!.items.map((i) => i.id)).toEqual([1, 2]);
+    expect(groups[0]!.items.map((i) => i.id)).toEqual([2, 1]); // newest added first
     expect(groups[1]!.status).toBe('current');
   });
 });

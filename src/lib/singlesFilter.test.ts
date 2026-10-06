@@ -43,21 +43,25 @@ const cards = [
 const ids = (list: Single[]) => list.map((s) => s.id);
 
 describe('filterSingles', () => {
+  it('lists newest-added first', () => {
+    expect(ids(filterSingles([cards[0]!, cards[2]!, cards[1]!], '', emptyFilters))).toEqual([3, 2, 1]);
+  });
+
   it('searches the full name, case-insensitively', () => {
-    expect(ids(filterSingles(cards, 'bulba', emptyFilters))).toEqual([2, 3]);
+    expect(ids(filterSingles(cards, 'bulba', emptyFilters))).toEqual([3, 2]);
     expect(ids(filterSingles(cards, ' psa ', emptyFilters))).toEqual([3]);
-    expect(ids(filterSingles(cards, '', emptyFilters))).toEqual([1, 2, 3]);
+    expect(ids(filterSingles(cards, '', emptyFilters))).toEqual([3, 2, 1]);
   });
 
   it('matches Pokémon / Set / Condition exactly, and combines with search', () => {
-    expect(ids(filterSingles(cards, '', { ...emptyFilters, pokemon: 'Bulbasaur' }))).toEqual([2, 3]);
+    expect(ids(filterSingles(cards, '', { ...emptyFilters, pokemon: 'Bulbasaur' }))).toEqual([3, 2]);
     expect(ids(filterSingles(cards, '', { ...emptyFilters, setName: '151' }))).toEqual([2]);
     expect(ids(filterSingles(cards, 'base', { ...emptyFilters, pokemon: 'Bulbasaur' }))).toEqual([3]);
   });
 
   it('filters an inclusive purchase-date range', () => {
     const f = { ...emptyFilters, dateFrom: '2026-05-01', dateTo: '2026-09-30' };
-    expect(ids(filterSingles(cards, '', f))).toEqual([2, 3]);
+    expect(ids(filterSingles(cards, '', f))).toEqual([3, 2]);
     expect(ids(filterSingles(cards, '', { ...emptyFilters, dateTo: '2026-04-30' }))).toEqual([1]);
   });
 });
