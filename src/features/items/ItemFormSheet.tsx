@@ -4,14 +4,17 @@ import { FieldRow, MoneyInput, Segmented, Stepper, TextInput } from '../../compo
 import { useNotify } from '../../components/notifyContext';
 import { SaveButton } from '../../components/SaveButton';
 import { Field, Sheet } from '../../components/Sheet';
-import { useAddSealed, useAddSingle } from '../../hooks/mutations';
+import type { SealedItem, Single } from '../../api/types';
+import { useAddSealed, useAddSingle, useEditSealed, useEditSingle } from '../../hooks/mutations';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import {
   emptyItemForm,
+  formFromItem,
   marketLabel,
   toSealedInput,
   toSingleInput,
   validateItemForm,
+  type ItemFormOriginal,
   type ItemFormValues,
   type ItemKind,
 } from '../../lib/itemForm';
@@ -23,6 +26,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   today: string;
+  editing?: Single | SealedItem | null;
 }
 
 function LinkButton({ onClick, children }: { onClick: () => void; children: string }) {
@@ -46,23 +50,31 @@ function LinkButton({ onClick, children }: { onClick: () => void; children: stri
   );
 }
 
-export function ItemFormSheet({ kind, open, onClose, today }: Props) {
+export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
   const notify = useNotify();
   const session = useSaveSession();
   const addSingle = useAddSingle();
   const addSealed = useAddSealed();
+  const editSingle = useEditSingle();
+  const editSealed = useEditSealed();
   const [form, setForm] = useState<ItemFormValues>(() => emptyItemForm(today));
+  const [original, setOriginal] = useState<ItemFormOriginal | null>(null);
   const [showTag, setShowTag] = useState(false);
   const [wasOpen, setWasOpen] = useState(open);
+  const [openCount, setOpenCount] = useState(0);
 
   if (open !== wasOpen) {
     setWasOpen(open);
     if (open) {
-      setForm(emptyItemForm(today));
-      setShowTag(false);
+      const prefill = editing ? formFromItem(editing, today) : null;
+      setOriginal(prefill);
+      setForm(prefill?.values ?? emptyItemForm(today));
+      setShowTag(!!prefill?.values.extra);
+      setOpenCount((n) => n + 1);
       session.reset();
     }
   }
+  const isEdit = !!editing;
 
   const set = <K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -71,7 +83,7 @@ export function ItemFormSheet({ kind, open, onClose, today }: Props) {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => set(key, e.target.value as never),
   });
 
-  const pending = addSingle.isPending || addSealed.isPending;
+  const pending = addSingle.isPending || addSealed.isPending || editSingle.isPending || editSealed.isPending;
 
   function submit() {
     const problem = validateItemForm(kind, form);
@@ -80,9 +92,14 @@ export function ItemFormSheet({ kind, open, onClose, today }: Props) {
       return;
     }
     const done = { onSuccess: onClose };
+    const prefill = original ?? undefined;
     if (kind === 'single') {
-      const input = toSingleInput(form);
-      addSingle.mutate({ requestId: session.idFor(input), input }, done);
+      const input = toSingleInput(form, prefill);
+      if (editing) editSingle.mutate({ requestId: session.idFor(input), id: editing.id, input }, done);
+      else addSingle.mutate({ requestId: session.idFor(input), input }, done);
+    } else if (editing) {
+      const input = toSealedInput(form, prefill);
+      editSealed.mutate({ requestId: session.idFor(input), id: editing.id, input }, done);
     } else {
       const input = toSealedInput(form);
       addSealed.mutate(
@@ -96,7 +113,7 @@ export function ItemFormSheet({ kind, open, onClose, today }: Props) {
     <Sheet
       open={open}
       onClose={onClose}
-      title={kind === 'single' ? 'Add Single Card' : 'Add Sealed Product'}
+      title={`${isEdit ? 'Edit' : 'Add'} ${kind === 'single' ? 'Single Card' : 'Sealed Product'}`}
       footer={
         <>
           <Button variant="outlined" color="inherit" onClick={onClose} sx={{ py: 1.5, fontSize: 15 }}>
@@ -104,15 +121,15 @@ export function ItemFormSheet({ kind, open, onClose, today }: Props) {
           </Button>
           <SaveButton
             pending={pending}
-            label="Add to Collection"
-            pendingLabel="Adding…"
+            label={isEdit ? 'Save Changes' : 'Add to Collection'}
+            pendingLabel={isEdit ? 'Saving…' : 'Adding…'}
             onClick={submit}
             sx={{ py: 1.5, fontSize: 15 }}
           />
         </>
       }
     >
-      {kind === 'sealed' && (
+      {kind === 'sealed' && !isEdit && (
         <Field label="Hold Type">
           <Segmented
             value={form.hold}
@@ -146,7 +163,7 @@ export function ItemFormSheet({ kind, open, onClose, today }: Props) {
             <TextInput placeholder="e.g. Obsidian Flames" {...text('setName')} />
           </Field>
           <Field label="Condition">
-            <ConditionPicker value={form.condition} onChange={(c) => set('condition', c)} />
+            <ConditionPicker key={openCount} value={form.condition} onChange={(c) => set('condition', c)} />
           </Field>
         </>
       )}

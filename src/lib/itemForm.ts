@@ -1,4 +1,5 @@
 import type { SealedInput, SingleInput } from '../api';
+import type { SealedItem, Single } from '../api/types';
 import { isValidCondition } from './condition';
 
 export type ItemKind = 'single' | 'sealed';
@@ -58,21 +59,58 @@ export function validateItemForm(kind: ItemKind, v: ItemFormValues): string | nu
   return null;
 }
 
-const shared = (v: ItemFormValues) => ({
-  quantity: v.quantity,
-  purchaseDate: v.purchaseDate,
-  baseCost: parseMoney(v.cost),
-  fees: parseMoney(v.fees),
-  feeUnits: v.feeUnits,
-  unitValue: parseMoney(v.market),
-});
+/** The exact stored numbers behind an edit form, and how they were displayed. */
+export interface ItemFormOriginal {
+  values: ItemFormValues;
+  baseCost: number;
+  fees: number;
+  unitValue: number | null;
+}
 
-export const toSingleInput = (v: ItemFormValues): SingleInput => ({
+const toInputText = (n: number) => String(Math.round(n * 100) / 100);
+
+export function formFromItem(item: Single | SealedItem, today: string): ItemFormOriginal {
+  const baseCost = item.totalCost - item.fees;
+  const values: ItemFormValues = {
+    ...emptyItemForm(today),
+    ...('pokemon' in item
+      ? { pokemon: item.pokemon, setName: item.setName, condition: item.condition, extra: item.extra }
+      : { name: item.name }),
+    quantity: item.quantity,
+    purchaseDate: item.purchaseDate ?? today,
+    cost: baseCost ? toInputText(baseCost) : '',
+    market: item.unitValue != null ? toInputText(item.unitValue) : '',
+    fees: item.fees ? toInputText(item.fees) : '',
+    feeUnits: item.feeUnits,
+  };
+  return { values, baseCost, fees: item.fees, unitValue: item.unitValue };
+}
+
+// Untouched money fields send back the exact stored value, so an edit never
+// rounds away fractions of a cent left by earlier partial sales or moves; an
+// untouched market value is sent as null so no quarter price gets written.
+function shared(v: ItemFormValues, original?: ItemFormOriginal) {
+  const keep = <T>(field: 'cost' | 'fees' | 'market', exact: T, parsed: number): T | number =>
+    original && v[field] === original.values[field] ? exact : parsed;
+  return {
+    quantity: v.quantity,
+    purchaseDate: v.purchaseDate,
+    baseCost: keep('cost', original?.baseCost ?? 0, parseMoney(v.cost)),
+    fees: keep('fees', original?.fees ?? 0, parseMoney(v.fees)),
+    feeUnits: v.feeUnits,
+    unitValue: keep('market', null, parseMoney(v.market)),
+  };
+}
+
+export const toSingleInput = (v: ItemFormValues, original?: ItemFormOriginal): SingleInput => ({
   pokemon: v.pokemon.trim(),
   setName: v.setName.trim(),
   condition: v.condition.trim().toUpperCase(),
   extra: v.extra.trim().toUpperCase(),
-  ...shared(v),
+  ...shared(v, original),
 });
 
-export const toSealedInput = (v: ItemFormValues): SealedInput => ({ name: v.name.trim(), ...shared(v) });
+export const toSealedInput = (v: ItemFormValues, original?: ItemFormOriginal): SealedInput => ({
+  name: v.name.trim(),
+  ...shared(v, original),
+});

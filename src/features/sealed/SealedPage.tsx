@@ -80,7 +80,7 @@ function GroupHeader({
   );
 }
 
-function SealedCard({ item, year }: { item: SealedItem; year: number }) {
+function SealedCard({ item, year, onEdit }: { item: SealedItem; year: number; onEdit: () => void }) {
   const isLong = item.holdStatus === 'long';
   return (
     <ItemCard
@@ -95,9 +95,8 @@ function SealedCard({ item, year }: { item: SealedItem; year: number }) {
         isLong ? quarterBoxes(item.quarterUnitValues, item.quantity, item.totalCost, year) : undefined
       }
       actions={
-        // Saving arrives in Phase 3; until then the old app does the writing.
         <>
-          <CardButton disabled>Edit</CardButton>
+          <CardButton onClick={onEdit}>Edit</CardButton>
           {isLong && (
             <CardButton variant="green" disabled>
               Mark Sold
@@ -119,6 +118,7 @@ export function SealedPage() {
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
   const [allCollapsed, setAllCollapsed] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<SealedItem | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
@@ -152,6 +152,13 @@ export function SealedPage() {
         kind="sealed"
         open={addOpen}
         onClose={() => setAddOpen(false)}
+        today={context.data.today}
+      />
+      <ItemFormSheet
+        kind="sealed"
+        open={editing != null}
+        editing={editing}
+        onClose={() => setEditing(null)}
         today={context.data.today}
       />
     </>
@@ -197,7 +204,12 @@ export function SealedPage() {
             {!isCollapsed && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {group.items.map((item) => (
-                  <SealedCard key={item.id} item={item} year={context.data.year} />
+                  <SealedCard
+                    key={item.id}
+                    item={item}
+                    year={context.data.year}
+                    onEdit={() => setEditing(item)}
+                  />
                 ))}
               </Box>
             )}

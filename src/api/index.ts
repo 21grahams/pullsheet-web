@@ -179,7 +179,8 @@ export interface SingleInput {
   baseCost: number;
   fees: number;
   feeUnits: number;
-  unitValue: number;
+  /** null on edit = keep the current price. */
+  unitValue: number | null;
 }
 
 export interface SealedInput {
@@ -189,7 +190,8 @@ export interface SealedInput {
   baseCost: number;
   fees: number;
   feeUnits: number;
-  unitValue: number;
+  /** null on edit = keep the current price. */
+  unitValue: number | null;
 }
 
 export interface AccountInput {
@@ -211,7 +213,7 @@ const singleArgs = (i: SingleInput) => ({
   p_base_cost: i.baseCost,
   p_fees: i.fees,
   p_fee_units: i.feeUnits,
-  p_unit_value: i.unitValue,
+  p_unit_value: i.unitValue as number,
 });
 
 const sealedArgs = (i: SealedInput) => ({
@@ -221,7 +223,7 @@ const sealedArgs = (i: SealedInput) => ({
   p_base_cost: i.baseCost,
   p_fees: i.fees,
   p_fee_units: i.feeUnits,
-  p_unit_value: i.unitValue,
+  p_unit_value: i.unitValue as number,
 });
 
 const accountArgs = (i: AccountInput) => ({

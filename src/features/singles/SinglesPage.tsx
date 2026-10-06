@@ -94,6 +94,7 @@ export function SinglesPage() {
   const [filters, setFilters] = useState<SinglesFilters>(emptyFilters);
   const [filterOpen, setFilterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<Single | null>(null);
 
   const all = useMemo(() => singles.data ?? [], [singles.data]);
   const shown = useMemo(() => filterSingles(all, search, filters), [all, search, filters]);
@@ -239,9 +240,8 @@ export function SinglesPage() {
                 feesLabel={pasFeesLabel(s.fees, s.feeUnits)}
                 quarters={quarterBoxes(s.quarterUnitValues, s.quantity, s.totalCost, context.data.year)}
                 actions={
-                  // Editing arrives in Phase 3; until then the old app does the writing.
                   <>
-                    <CardButton disabled>Edit</CardButton>
+                    <CardButton onClick={() => setEditing(s)}>Edit</CardButton>
                     <CardButton variant="green" disabled>
                       Mark Sold
                     </CardButton>
@@ -261,6 +261,13 @@ export function SinglesPage() {
         kind="single"
         open={addOpen}
         onClose={() => setAddOpen(false)}
+        today={context.data.today}
+      />
+      <ItemFormSheet
+        kind="single"
+        open={editing != null}
+        editing={editing}
+        onClose={() => setEditing(null)}
         today={context.data.today}
       />
 
