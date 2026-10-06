@@ -1,10 +1,9 @@
 import { Box } from '@mui/material';
+import { isLiveDatabase } from '../lib/environment';
 import { tokens } from '../theme/tokens';
 
-const isLive = (import.meta.env.VITE_SUPABASE_URL ?? '').includes('.supabase.co');
-
 export function PracticeBanner() {
-  if (isLive) return null;
+  if (isLiveDatabase) return null;
   return (
     <Box
       sx={{

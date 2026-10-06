@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
+import { cachePersister } from '../../lib/queryClient';
 import { supabase } from '../../lib/supabase';
 import { AuthContext, friendlyAuthError, type AuthContextValue } from './authContext';
 
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut({ scope: 'local' });
       // Drop every piece of loaded data so nothing lingers on the device.
       queryClient.clear();
+      await cachePersister.removeClient();
     },
   };
 

@@ -159,3 +159,168 @@ export async function getSummary(): Promise<Summary> {
     totalRealizedProfit: num(r.total_realized_profit),
   };
 }
+
+async function save<T>(
+  call: PromiseLike<{ data: T | null; error: { message: string } | null }>,
+): Promise<T | null> {
+  if (!navigator.onLine) throw new ApiError("You're offline — changes can't be saved until you reconnect.");
+  const { data, error } = await call;
+  if (error) throw new ApiError(error.message);
+  return data;
+}
+
+export interface SingleInput {
+  pokemon: string;
+  setName: string;
+  condition: string;
+  extra: string;
+  quantity: number;
+  purchaseDate: string;
+  baseCost: number;
+  fees: number;
+  feeUnits: number;
+  unitValue: number;
+}
+
+export interface SealedInput {
+  name: string;
+  quantity: number;
+  purchaseDate: string;
+  baseCost: number;
+  fees: number;
+  feeUnits: number;
+  unitValue: number;
+}
+
+export interface AccountInput {
+  label: string;
+  email: string;
+  cardLast2: string;
+  phoneLast4: string;
+  loop: string;
+  notes: string;
+}
+
+const singleArgs = (i: SingleInput) => ({
+  p_pokemon: i.pokemon,
+  p_set_name: i.setName,
+  p_condition: i.condition,
+  p_extra: i.extra,
+  p_quantity: i.quantity,
+  p_purchase_date: i.purchaseDate,
+  p_base_cost: i.baseCost,
+  p_fees: i.fees,
+  p_fee_units: i.feeUnits,
+  p_unit_value: i.unitValue,
+});
+
+const sealedArgs = (i: SealedInput) => ({
+  p_name: i.name,
+  p_quantity: i.quantity,
+  p_purchase_date: i.purchaseDate,
+  p_base_cost: i.baseCost,
+  p_fees: i.fees,
+  p_fee_units: i.feeUnits,
+  p_unit_value: i.unitValue,
+});
+
+const accountArgs = (i: AccountInput) => ({
+  p_label: i.label,
+  p_email: i.email,
+  p_card_last2: i.cardLast2,
+  p_phone_last4: i.phoneLast4,
+  p_loop: i.loop,
+  p_notes: i.notes,
+});
+
+export const addSingle = (requestId: string, input: SingleInput) =>
+  save(supabase.rpc('api_add_single', { p_request_id: requestId, ...singleArgs(input) }));
+
+export const editSingle = (requestId: string, id: number, input: SingleInput) =>
+  save(supabase.rpc('api_edit_single', { p_request_id: requestId, p_id: id, ...singleArgs(input) }));
+
+export const deleteSingle = (requestId: string, id: number) =>
+  save(supabase.rpc('api_delete_single', { p_request_id: requestId, p_id: id }));
+
+export const sellSingle = (
+  requestId: string,
+  id: number,
+  quantity: number,
+  soldPrice: number,
+  profit: number,
+) =>
+  save(
+    supabase.rpc('api_sell_single', {
+      p_request_id: requestId,
+      p_id: id,
+      p_quantity: quantity,
+      p_sold_price: soldPrice,
+      p_profit: profit,
+    }),
+  );
+
+export const addSealed = (requestId: string, hold: 'long' | 'short', input: SealedInput) =>
+  save(supabase.rpc('api_add_sealed', { p_request_id: requestId, p_hold: hold, ...sealedArgs(input) }));
+
+export const editSealed = (requestId: string, id: number, input: SealedInput) =>
+  save(supabase.rpc('api_edit_sealed', { p_request_id: requestId, p_id: id, ...sealedArgs(input) }));
+
+export const deleteSealed = (requestId: string, id: number) =>
+  save(supabase.rpc('api_delete_sealed', { p_request_id: requestId, p_id: id }));
+
+export const sellLongHoldItem = (
+  requestId: string,
+  id: number,
+  quantity: number,
+  soldPrice: number,
+  profit: number,
+) =>
+  save(
+    supabase.rpc('api_sell_long_hold_item', {
+      p_request_id: requestId,
+      p_id: id,
+      p_quantity: quantity,
+      p_sold_price: soldPrice,
+      p_profit: profit,
+    }),
+  );
+
+export const moveSealed = (requestId: string, id: number, quantity: number) =>
+  save(supabase.rpc('api_move_sealed', { p_request_id: requestId, p_id: id, p_quantity: quantity }));
+
+export const completeShortHold = (requestId: string, soldPrice: number, profit: number) =>
+  save(
+    supabase.rpc('api_complete_short_hold', {
+      p_request_id: requestId,
+      p_sold_price: soldPrice,
+      p_profit: profit,
+    }),
+  );
+
+export const setQuarterPrice = (
+  requestId: string,
+  item: { singleId: number } | { sealedItemId: number },
+  quarter: 1 | 2 | 3 | 4,
+  unitValue: number,
+) =>
+  save(
+    supabase.rpc('api_set_quarter_price', {
+      p_request_id: requestId,
+      // The generated types don't allow null, but exactly one id must be null.
+      p_single_id: ('singleId' in item ? item.singleId : null) as number,
+      p_sealed_item_id: ('sealedItemId' in item ? item.sealedItemId : null) as number,
+      p_quarter: quarter,
+      p_unit_value: unitValue,
+    }),
+  );
+
+export const addAccount = (requestId: string, retailer: string, input: AccountInput) =>
+  save(
+    supabase.rpc('api_add_account', { p_request_id: requestId, p_retailer: retailer, ...accountArgs(input) }),
+  );
+
+export const editAccount = (requestId: string, id: number, input: AccountInput) =>
+  save(supabase.rpc('api_edit_account', { p_request_id: requestId, p_id: id, ...accountArgs(input) }));
+
+export const deleteAccount = (requestId: string, id: number) =>
+  save(supabase.rpc('api_delete_account', { p_request_id: requestId, p_id: id }));

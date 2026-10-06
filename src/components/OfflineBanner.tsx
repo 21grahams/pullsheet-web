@@ -1,12 +1,29 @@
 import { Box } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { tokens } from '../theme/tokens';
 
-// Phase 1: the banner itself. Phase 2 adds "last updated" once data is
-// cached, and Phase 3 disables every saving action while this shows.
+function lastUpdated(times: number[]): string | null {
+  const latest = Math.max(0, ...times);
+  if (!latest) return null;
+  return new Date(latest).toLocaleString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export function OfflineBanner() {
   const online = useOnlineStatus();
+  const queryClient = useQueryClient();
   if (online) return null;
+  const updated = lastUpdated(
+    queryClient
+      .getQueryCache()
+      .getAll()
+      .map((q) => q.state.dataUpdatedAt),
+  );
   return (
     <Box
       role="status"
@@ -20,7 +37,7 @@ export function OfflineBanner() {
         borderBottom: `1px solid ${tokens.border}`,
       }}
     >
-      You're offline. Showing the last loaded data; saving is paused until you reconnect.
+      You're offline. Showing data last updated {updated ?? 'earlier'}; saving is paused until you reconnect.
     </Box>
   );
 }
