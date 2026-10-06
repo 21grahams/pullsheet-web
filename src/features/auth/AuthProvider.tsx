@@ -28,7 +28,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return error ? friendlyAuthError(error.message) : null;
     },
     async signOut() {
-      await supabase.auth.signOut();
+      // 'local' = log out this device only. Supabase's default ('global')
+      // would also end the session on every other device you're logged into.
+      await supabase.auth.signOut({ scope: 'local' });
       // Drop every piece of loaded data so nothing lingers on the device.
       queryClient.clear();
     },
