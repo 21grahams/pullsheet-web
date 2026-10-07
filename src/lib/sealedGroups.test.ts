@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
 import type { SealedItem } from '../api/types';
+
+import { describe, expect, it } from 'vitest';
+
 import { groupSealed, groupSummary } from './sealedGroups';
 
 function item(overrides: Partial<SealedItem>): SealedItem {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { formatDate, formatMoney, formatRatioPct, formatSignedPct } from './format';
 
 describe('formatMoney', () => {

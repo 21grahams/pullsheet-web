@@ -16,6 +16,7 @@ export function parseCondition(text: string): Condition | null {
   const [grader, grade, ...rest] = t.split(/\s+/);
   const g = GRADERS.find((x) => x === grader);
   if (g && grade && !rest.length && GRADES.includes(grade)) return { kind: 'graded', grader: g, grade };
+
   return null;
 }
 

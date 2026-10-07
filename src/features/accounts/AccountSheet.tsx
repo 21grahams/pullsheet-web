@@ -1,6 +1,9 @@
+import type { RetailerAccount } from '../../api/types';
+import type { AccountFormValues } from '../../lib/accountForm';
+
 import { Box } from '@mui/material';
 import { useId, useState } from 'react';
-import type { RetailerAccount } from '../../api/types';
+
 import { FieldRow, Segmented, TextArea, TextInput } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
 import { CancelButton, Field, Sheet } from '../../components/Sheet';
@@ -11,7 +14,6 @@ import {
   formFromAccount,
   toAccountInput,
   validateAccountForm,
-  type AccountFormValues,
 } from '../../lib/accountForm';
 import { tokens } from '../../theme/tokens';
 

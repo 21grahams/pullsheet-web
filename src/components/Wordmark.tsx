@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+
 import { fonts, tokens } from '../theme/tokens';
 
 export function Wordmark() {

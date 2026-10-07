@@ -1,5 +1,7 @@
-import { Box } from '@mui/material';
 import type { ReactNode } from 'react';
+
+import { Box } from '@mui/material';
+
 import { tokens } from '../theme/tokens';
 
 type Variant = 'primary' | 'secondary' | 'green' | 'danger';

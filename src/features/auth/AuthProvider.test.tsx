@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+
 import { useAuth } from './authContext';
 import { AuthProvider } from './AuthProvider';
 
@@ -18,6 +19,7 @@ vi.mock('../../lib/supabase', () => ({
 
 function LogoutButton() {
   const { signOut: logOut } = useAuth();
+
   return <button onClick={() => logOut()}>Log out</button>;
 }
 

@@ -1,5 +1,8 @@
+import type { ReactNode } from 'react';
+
 import { Box, Button, Drawer } from '@mui/material';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+
 import { fonts, tokens } from '../theme/tokens';
 
 interface SheetProps {
@@ -31,6 +34,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
     if (closeCount === 0) return;
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     const frame = requestAnimationFrame(() => window.scrollTo(0, savedScroll));
+
     return () => cancelAnimationFrame(frame);
   }, [closeCount, savedScroll]);
 

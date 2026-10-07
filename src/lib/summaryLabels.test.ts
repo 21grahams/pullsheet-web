@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { formatSignedPct } from './format';
 import { realizedProfitLabel, returnPct } from './summaryLabels';
 

@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
 import type { Single } from '../api/types';
+
+import { describe, expect, it } from 'vitest';
+
 import { activeFilterCount, emptyFilters, filterOptions, filterSingles } from './singlesFilter';
 
 function single(overrides: Partial<Single>): Single {

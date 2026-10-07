@@ -1,5 +1,7 @@
-import { Box } from '@mui/material';
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
+
+import { Box } from '@mui/material';
+
 import { flipSign } from '../lib/sellForm';
 import { fonts, tokens } from '../theme/tokens';
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { GRADES, formatCondition, isValidCondition, parseCondition } from './condition';
+
+import { formatCondition, GRADES, isValidCondition, parseCondition } from './condition';
 
 describe('parseCondition', () => {
   it('reads raw conditions', () => {

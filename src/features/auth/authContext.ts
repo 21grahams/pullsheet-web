@@ -1,4 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
+
 import { createContext, useContext } from 'react';
 
 export interface AuthContextValue {
@@ -13,11 +14,13 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+
   return ctx;
 }
 
 export function friendlyAuthError(message: string): string {
   if (/invalid login credentials/i.test(message)) return 'Wrong email or password.';
   if (/fetch|network/i.test(message)) return "Can't reach PullSheet. Check your connection and try again.";
+
   return message;
 }

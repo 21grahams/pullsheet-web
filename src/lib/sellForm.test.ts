@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { autoProfit, flipSign, partialSaleNote, validateHoldSale, validateSale } from './sellForm';
 
 describe('autoProfit', () => {

@@ -1,10 +1,13 @@
+import type { ReactNode } from 'react';
+import type { RetailerAccount } from '../../api/types';
+
 import { Box, Button } from '@mui/material';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
+
 import { CardButton } from '../../components/CardActions';
+import { useAccounts } from '../../hooks/queries';
 import { tokens } from '../../theme/tokens';
 import { useAuth } from '../auth/authContext';
-import type { RetailerAccount } from '../../api/types';
-import { useAccounts } from '../../hooks/queries';
 import { AccountSheet } from './AccountSheet';
 import { RemoveAccountDialog } from './RemoveAccountDialog';
 import { RetailerAccounts } from './RetailerAccounts';

@@ -14,6 +14,7 @@ export function formatMoney(n: number | null | undefined): string {
 
 export function formatSignedPct(pct: number): string {
   if (Number.isNaN(pct)) return '—';
+
   return (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
 }
 
@@ -28,5 +29,6 @@ export function formatRatioPct(ratio: number): string {
 export function formatDate(isoDate: string | null | undefined): string {
   if (!isoDate) return '';
   const [y, m, d] = isoDate.slice(0, 10).split('-');
+
   return y && m && d ? `${m}/${d}/${y}` : '';
 }

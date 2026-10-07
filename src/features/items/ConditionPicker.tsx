@@ -1,7 +1,10 @@
+import type { Grader } from '../../lib/condition';
+
 import { Box } from '@mui/material';
 import { useState } from 'react';
+
 import { Segmented } from '../../components/form';
-import { GRADERS, GRADES, RAW_CONDITIONS, parseCondition, type Grader } from '../../lib/condition';
+import { GRADERS, GRADES, parseCondition, RAW_CONDITIONS } from '../../lib/condition';
 import { fonts, tokens } from '../../theme/tokens';
 
 const selectSx = {
@@ -47,6 +50,7 @@ export function ConditionPicker({ value, onChange }: { value: string; onChange: 
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0.75 }}>
             {RAW_CONDITIONS.map((code) => {
               const selected = value === code;
+
               return (
                 <Box
                   key={code}

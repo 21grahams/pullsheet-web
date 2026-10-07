@@ -37,6 +37,7 @@ export function formFromAccount(a: RetailerAccount): AccountFormValues {
 export function validateAccountForm(f: AccountFormValues): string | null {
   if (!f.retailer.trim()) return 'Enter a retailer';
   if (!f.label.trim()) return 'Enter an account label';
+
   return null;
 }
 

@@ -1,11 +1,13 @@
 import { Box } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
+
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { tokens } from '../theme/tokens';
 
 function lastUpdated(times: number[]): string | null {
   const latest = Math.max(0, ...times);
   if (!latest) return null;
+
   return new Date(latest).toLocaleString('en-US', {
     month: '2-digit',
     day: '2-digit',
@@ -24,6 +26,7 @@ export function OfflineBanner() {
       .getAll()
       .map((q) => q.state.dataUpdatedAt),
   );
+
   return (
     <Box
       role="status"

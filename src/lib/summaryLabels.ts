@@ -7,6 +7,7 @@ export function realizedProfitLabel(
   if (s.singlesSales.hasSales) parts.push('Singles');
   if (s.longHoldSales.hasSales) parts.push('Long Hold');
   parts.push(`Short Holds 1–${s.completedHoldCount}`);
+
   return `Realized Profit — ${parts.join(' + ')}`;
 }
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { resolveDatabaseUrl } from './environment';
 
 describe('resolveDatabaseUrl', () => {

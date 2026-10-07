@@ -1,5 +1,7 @@
-import { Box, Button, CircularProgress } from '@mui/material';
 import type { ReactNode } from 'react';
+
+import { Box, Button, CircularProgress } from '@mui/material';
+
 import { tokens } from '../theme/tokens';
 
 export function LoadingState() {
@@ -24,6 +26,7 @@ function friendlyLoadError(error: unknown): string {
   if (/load failed|failed to fetch|network/i.test(message)) {
     return "Can't reach PullSheet. Check your connection and try again.";
   }
+
   return `Couldn't load this. ${message}`;
 }
 

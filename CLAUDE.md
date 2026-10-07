@@ -55,6 +55,10 @@ Rules:
 - **Show code/diffs before committing**, even locally. **Ask before every push.**
 - Desktop and iPhone both matter; say when something needs a real-device check.
 - Small, reviewable steps.
+- **Imports:** type imports first, then third-party, then ours, with a blank line between sections.
+  Prettier sorts them automatically (`npm run format`); CI fails if they're out of order.
+- **A blank line before `return`** when other statements come before it in the block (early
+  `if (…) return` one-liners excepted). Not enforced by a tool; follow it by hand.
 - **Minimal comments.** Only add one when the code would mislead without it (a non-obvious
   "why"). No comments that just describe what the code does.
 

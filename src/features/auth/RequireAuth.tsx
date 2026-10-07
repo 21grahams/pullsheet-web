@@ -1,6 +1,8 @@
-import { Box, CircularProgress } from '@mui/material';
 import type { ReactNode } from 'react';
+
+import { Box, CircularProgress } from '@mui/material';
 import { Navigate } from 'react-router';
+
 import { useAuth } from './authContext';
 
 export function RequireAuth({ children }: { children: ReactNode }) {
@@ -14,5 +16,6 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     );
   }
   if (!session) return <Navigate to="/login" replace />;
+
   return <>{children}</>;
 }

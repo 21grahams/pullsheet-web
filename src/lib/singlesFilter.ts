@@ -21,6 +21,7 @@ export const newestFirst = <T extends { id: number }>(items: readonly T[]): T[] 
 
 export function filterSingles(singles: readonly Single[], search: string, f: SinglesFilters): Single[] {
   const q = search.trim().toLowerCase();
+
   return newestFirst(singles).filter((s) => {
     if (q && !s.displayName.toLowerCase().includes(q)) return false;
     if (f.pokemon && s.pokemon !== f.pokemon) return false;
@@ -29,6 +30,7 @@ export function filterSingles(singles: readonly Single[], search: string, f: Sin
     // ISO dates compare correctly as strings, with no time-zone surprises.
     if (f.dateFrom && (!s.purchaseDate || s.purchaseDate < f.dateFrom)) return false;
     if (f.dateTo && (!s.purchaseDate || s.purchaseDate > f.dateTo)) return false;
+
     return true;
   });
 }
@@ -39,6 +41,7 @@ export function activeFilterCount(f: SinglesFilters): number {
 
 export function filterOptions(singles: readonly Single[]) {
   const uniq = (values: string[]) => [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
   return {
     pokemon: uniq(singles.map((s) => s.pokemon)),
     setName: uniq(singles.map((s) => s.setName)),

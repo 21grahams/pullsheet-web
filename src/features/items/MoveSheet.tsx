@@ -1,6 +1,8 @@
+import type { SealedItem } from '../../api/types';
+
 import { Box } from '@mui/material';
 import { useState } from 'react';
-import type { SealedItem } from '../../api/types';
+
 import { Stepper } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
 import { CancelButton, Field, Sheet } from '../../components/Sheet';

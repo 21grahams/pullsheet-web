@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
+
 import { tokens } from '../theme/tokens';
 
 export function ScrollTopButton() {
@@ -16,6 +17,7 @@ export function ScrollTopButton() {
       });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 

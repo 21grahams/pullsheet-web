@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
 import type { RetailerAccount } from '../api/types';
+
+import { describe, expect, it } from 'vitest';
+
 import { groupAccounts, retailerColor } from './retailers';
 
 describe('retailerColor', () => {

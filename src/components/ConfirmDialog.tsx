@@ -1,4 +1,5 @@
 import { Box, Button, CircularProgress, Dialog } from '@mui/material';
+
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { fonts, tokens } from '../theme/tokens';
 
@@ -22,6 +23,7 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const online = useOnlineStatus();
+
   return (
     <Dialog
       open={open}

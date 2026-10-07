@@ -1,6 +1,7 @@
 import { Box, Tab, Tabs } from '@mui/material';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
+
 import { tokens } from '../theme/tokens';
 import { OfflineBanner } from './OfflineBanner';
 import { PracticeBanner } from './PracticeBanner';
@@ -22,6 +23,7 @@ export function AppShell() {
       scrollByTab.current[tabRef.current] = window.scrollY;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
   useLayoutEffect(() => {
@@ -42,6 +44,7 @@ export function AppShell() {
     setHeaderHeight(el.offsetHeight);
     const observer = new ResizeObserver(() => setHeaderHeight(el.offsetHeight));
     observer.observe(el);
+
     return () => observer.disconnect();
   }, []);
 

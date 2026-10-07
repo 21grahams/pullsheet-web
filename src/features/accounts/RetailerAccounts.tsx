@@ -1,10 +1,13 @@
+import type { RetailerAccount } from '../../api/types';
+import type { RetailerGroup } from '../../lib/retailers';
+
 import { Box } from '@mui/material';
 import { useState } from 'react';
-import type { RetailerAccount } from '../../api/types';
+
 import { CardButton } from '../../components/CardActions';
 import { ErrorState, LoadingState } from '../../components/ListStates';
 import { useAccounts } from '../../hooks/queries';
-import { groupAccounts, type RetailerGroup } from '../../lib/retailers';
+import { groupAccounts } from '../../lib/retailers';
 import { fonts, tokens } from '../../theme/tokens';
 
 const detail = { fontSize: 12, color: tokens.text2, fontFamily: fonts.mono, mt: '3px' } as const;
@@ -65,6 +68,7 @@ function Group({ group, ...handlers }: { group: RetailerGroup } & CardHandlers) 
   // Starts collapsed so emails and card digits only show when you open a group.
   const [collapsed, setCollapsed] = useState(true);
   const n = group.accounts.length;
+
   return (
     <Box sx={{ mb: 0.5 }}>
       <Box
@@ -136,6 +140,7 @@ export function RetailerAccounts(handlers: CardHandlers) {
       </Box>
     );
   }
+
   return (
     <Box>
       {groups.map((g) => (

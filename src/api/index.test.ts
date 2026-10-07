@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ApiError, deleteSingle, listSingles } from './index';
 
 const rpc = vi.fn();
@@ -57,6 +58,7 @@ describe('api', () => {
     vi.useFakeTimers();
     rpc.mockImplementation((...args: unknown[]) => {
       const signal = args.at(-1) as AbortSignal;
+
       return new Promise((resolve) =>
         signal.addEventListener('abort', () => resolve({ data: null, error: { message: 'AbortError' } })),
       );

@@ -1,6 +1,5 @@
 // The only module that talks to Supabase.
 
-import { supabase } from '../lib/supabase';
 import type {
   AppContext,
   CompletedHold,
@@ -10,6 +9,8 @@ import type {
   Single,
   Summary,
 } from './types';
+
+import { supabase } from '../lib/supabase';
 
 export class ApiError extends Error {
   override name = 'ApiError';
@@ -30,6 +31,7 @@ async function send<T>(
     if (controller.signal.aborted) {
       return { data: null, error: { message: 'Request timed out — check your connection and try again' } };
     }
+
     return result;
   } finally {
     clearTimeout(timer);
@@ -39,6 +41,7 @@ async function send<T>(
 function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
   if (error) throw new ApiError(error.message);
   if (data == null) throw new ApiError('No data returned');
+
   return data;
 }
 
@@ -49,6 +52,7 @@ const num = (v: unknown): number => Number(v ?? 0);
 export async function getContext(): Promise<AppContext> {
   const [row] = unwrap(await send(supabase.rpc('api_get_context')));
   if (!row) throw new ApiError('No context returned');
+
   return {
     today: row.today,
     year: row.year,
@@ -60,6 +64,7 @@ export async function getContext(): Promise<AppContext> {
 
 export async function listSingles(): Promise<Single[]> {
   const rows = unwrap(await send(supabase.rpc('api_list_singles')));
+
   return rows.map((r) => ({
     id: r.id,
     pokemon: r.pokemon,
@@ -79,6 +84,7 @@ export async function listSingles(): Promise<Single[]> {
 
 export async function listSealed(): Promise<SealedItem[]> {
   const rows = unwrap(await send(supabase.rpc('api_list_sealed')));
+
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -98,6 +104,7 @@ export async function listSealed(): Promise<SealedItem[]> {
 
 export async function listAccounts(): Promise<RetailerAccount[]> {
   const rows = unwrap(await send(supabase.rpc('api_list_accounts')));
+
   return rows.map((r) => ({
     id: r.id,
     retailer: r.retailer,
@@ -112,6 +119,7 @@ export async function listAccounts(): Promise<RetailerAccount[]> {
 
 export async function listCompletedHolds(): Promise<CompletedHold[]> {
   const rows = unwrap(await send(supabase.rpc('api_list_completed_holds')));
+
   return rows.map((r) => ({
     id: r.id,
     number: r.number,
@@ -128,6 +136,7 @@ export async function listCompletedHolds(): Promise<CompletedHold[]> {
 export async function getSummary(): Promise<Summary> {
   const [r] = unwrap(await send(supabase.rpc('api_get_summary')));
   if (!r) throw new ApiError('No summary returned');
+
   return {
     singles: {
       spent: num(r.singles_spent),
@@ -182,6 +191,7 @@ async function save<T>(call: Parameters<typeof send<T>>[0]): Promise<T | null> {
   if (!navigator.onLine) throw new ApiError("You're offline — changes can't be saved until you reconnect.");
   const { data, error } = await send(call);
   if (error) throw new ApiError(error.message);
+
   return data;
 }
 

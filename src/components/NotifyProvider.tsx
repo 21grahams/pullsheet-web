@@ -1,7 +1,11 @@
+import type { ReactNode } from 'react';
+import type { NotifyKind } from './notifyContext';
+
 import { Snackbar } from '@mui/material';
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useState } from 'react';
+
 import { tokens } from '../theme/tokens';
-import { NotifyContext, type NotifyKind } from './notifyContext';
+import { NotifyContext } from './notifyContext';
 
 const COLORS: Record<NotifyKind, string> = { success: tokens.green, error: tokens.red, info: tokens.text };
 

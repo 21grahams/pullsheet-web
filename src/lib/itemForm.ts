@@ -1,5 +1,6 @@
 import type { SealedInput, SingleInput } from '../api';
 import type { SealedItem, Single } from '../api/types';
+
 import { isValidCondition } from './condition';
 
 export type ItemKind = 'single' | 'sealed';
@@ -41,6 +42,7 @@ export const marketLabel = (quantity: number) =>
 
 function parseMoney(text: string): number {
   const n = Number.parseFloat(text.replace(/[$,\s]/g, ''));
+
   return Number.isFinite(n) ? n : 0;
 }
 
@@ -55,6 +57,7 @@ export function validateItemForm(kind: ItemKind, v: ItemFormValues): string | nu
   }
   if (!parseMoney(v.market)) return 'Enter a market value per item';
   if (v.feeUnits > v.quantity) return "Units w/ Fee can't exceed total quantity";
+
   return null;
 }
 
@@ -81,6 +84,7 @@ export function formFromItem(item: Single | SealedItem, today: string): ItemForm
     fees: item.fees ? toInputText(item.fees) : '',
     feeUnits: item.feeUnits,
   };
+
   return { values, baseCost, fees: item.fees, unitValue: item.unitValue };
 }
 
@@ -90,6 +94,7 @@ export function formFromItem(item: Single | SealedItem, today: string): ItemForm
 function shared(v: ItemFormValues, original?: ItemFormOriginal) {
   const keep = <T>(field: 'cost' | 'fees' | 'market', exact: T, parsed: number): T | number =>
     original && v[field] === original.values[field] ? exact : parsed;
+
   return {
     quantity: v.quantity,
     purchaseDate: v.purchaseDate,

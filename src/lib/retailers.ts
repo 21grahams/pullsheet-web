@@ -18,6 +18,7 @@ export function retailerColor(name: string): string {
   let hash = 0;
   const str = name.toLowerCase().trim();
   for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+
   return RETAILER_PALETTE[hash % RETAILER_PALETTE.length]!;
 }
 
@@ -37,5 +38,6 @@ export function groupAccounts(accounts: readonly RetailerAccount[]): RetailerGro
     }
     g.accounts.push(a);
   }
+
   return [...groups.values()];
 }

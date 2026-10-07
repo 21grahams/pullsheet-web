@@ -1,9 +1,11 @@
 import { Box } from '@mui/material';
+
 import { isLiveDatabase } from '../lib/environment';
 import { tokens } from '../theme/tokens';
 
 export function PracticeBanner() {
   if (isLiveDatabase) return null;
+
   return (
     <Box
       sx={{

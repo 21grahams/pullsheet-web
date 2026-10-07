@@ -37,6 +37,7 @@ export function cardNumbers(item: PricedItem, opts: { fallbackToCost?: boolean }
   const gain = totalValue - totalCost;
   const value80 = totalValue * 0.8;
   const profit80 = value80 - totalCost;
+
   return {
     unitCost,
     unitValue,
@@ -73,8 +74,10 @@ export function quarterBoxes(
   totals.forEach((t, i) => {
     if (t != null) activeIndex = i;
   });
+
   return totals.map((total, i) => {
     const prev = i === 0 ? totalCost : (totals[i - 1] ?? 0);
+
     return {
       quarter: (i + 1) as QuarterBox['quarter'],
       label: `Q${i + 1} ${year}`,
@@ -89,6 +92,7 @@ export function quarterBoxes(
 export function pasFeesLabel(fees: number, feeUnits: number): string | null {
   if (!fees) return null;
   if (feeUnits > 0) return `${formatMoney(fees / feeUnits)} × ${feeUnits} unit${feeUnits !== 1 ? 's' : ''}`;
+
   return formatMoney(fees);
 }
 
@@ -112,6 +116,7 @@ export function totals(items: readonly PricedItem[], opts: { fallbackToCost?: bo
     totalValue += n.totalValue;
   }
   const gain = totalValue - totalCost;
+
   return {
     units,
     totalCost,
@@ -131,5 +136,6 @@ export function cardsLabel(
   let label = `${cards} card${cards !== 1 ? 's' : ''}`;
   if (shown.length !== cards) label += ` (${shown.length} entr${shown.length !== 1 ? 'ies' : 'y'})`;
   if (shown.length !== all.length) label += ` of ${allCards}`;
+
   return label;
 }

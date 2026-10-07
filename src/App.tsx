@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
+
 import { AppShell } from './components/AppShell';
 import { SettingsPage } from './features/accounts/SettingsPage';
 import { LoginPage } from './features/auth/LoginPage';

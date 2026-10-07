@@ -1,9 +1,12 @@
+import type { AuthContextValue } from './authContext';
+
 import { ThemeProvider } from '@mui/material';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
+
 import { theme } from '../../theme/theme';
-import { AuthContext, friendlyAuthError, type AuthContextValue } from './authContext';
+import { AuthContext, friendlyAuthError } from './authContext';
 import { LoginPage } from './LoginPage';
 
 // The real AuthProvider talks to Supabase; these tests only need the
@@ -27,6 +30,7 @@ function renderLogin(overrides: Partial<AuthContextValue> = {}) {
       </MemoryRouter>
     </ThemeProvider>,
   );
+
   return value;
 }
 

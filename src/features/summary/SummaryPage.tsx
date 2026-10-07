@@ -1,6 +1,8 @@
-import { Box } from '@mui/material';
 import type { ReactNode } from 'react';
 import type { SalesBox, SummaryBox } from '../../api/types';
+
+import { Box } from '@mui/material';
+
 import { ErrorState, LoadingState } from '../../components/ListStates';
 import { useCompletedHolds, useSummary } from '../../hooks/queries';
 import { formatMoney, formatRatioPct, formatSignedPct } from '../../lib/format';
@@ -86,6 +88,7 @@ function PeriodBox({
       <Box sx={{ fontFamily: fonts.mono, fontSize: 12, color }}>{value}</Box>
     </Box>
   );
+
   return (
     <Box
       sx={{
@@ -124,6 +127,7 @@ export function SummaryPage() {
   if (!summary.data || !holds.data) {
     if (summary.isError) return <ErrorState error={summary.error} onRetry={() => summary.refetch()} />;
     if (holds.isError) return <ErrorState error={holds.error} onRetry={() => holds.refetch()} />;
+
     return <LoadingState />;
   }
 

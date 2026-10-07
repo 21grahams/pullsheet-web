@@ -9,5 +9,6 @@ export function resolveDatabaseUrl(configured: string, pageHost: string): string
   const url = new URL(configured);
   if (url.hostname !== 'localhost' || !pageHost) return configured;
   url.hostname = pageHost;
+
   return url.origin;
 }

@@ -1,6 +1,11 @@
+import type { Single } from '../../api/types';
+import type { SinglesFilters } from '../../lib/singlesFilter';
+import type { QuarterTarget } from '../items/QuarterSheet';
+import type { SellTarget } from '../items/SellSheet';
+
 import { Box, Button } from '@mui/material';
 import { useMemo, useState } from 'react';
-import type { Single } from '../../api/types';
+
 import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
@@ -8,24 +13,19 @@ import { EmptyState, ErrorState, LoadingState } from '../../components/ListState
 import { useAppContext, useSingles } from '../../hooks/queries';
 import { cardNumbers, cardsLabel, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate, formatMoney, formatSignedPct } from '../../lib/format';
-import {
-  activeFilterCount,
-  emptyFilters,
-  filterOptions,
-  filterSingles,
-  type SinglesFilters,
-} from '../../lib/singlesFilter';
+import { activeFilterCount, emptyFilters, filterOptions, filterSingles } from '../../lib/singlesFilter';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
-import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
+import { QuarterSheet } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
-import { SellSheet, type SellTarget } from '../items/SellSheet';
+import { SellSheet } from '../items/SellSheet';
 import { SinglesFilterSheet } from './SinglesFilterSheet';
 
 function Subtitle({ single }: { single: Single }) {
   const parts = [`Qty: ${single.quantity}`, formatDate(single.purchaseDate), single.condition].filter(
     Boolean,
   );
+
   return (
     <>
       {parts.join(' · ')}
@@ -108,6 +108,7 @@ export function SinglesPage() {
   if (!singles.data || !context.data) {
     if (singles.isError) return <ErrorState error={singles.error} onRetry={() => singles.refetch()} />;
     if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
+
     return <LoadingState />;
   }
 

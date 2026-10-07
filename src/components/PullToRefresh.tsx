@@ -1,6 +1,7 @@
 import { Box, CircularProgress } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
+
 import { tokens } from '../theme/tokens';
 
 const SHOW_AT = 30; // px pulled before the pill appears
@@ -54,6 +55,7 @@ export function PullToRefresh({ top }: { top: number }) {
     window.addEventListener('touchstart', onStart, { passive: true });
     window.addEventListener('touchmove', onMove, { passive: true });
     window.addEventListener('touchend', onEnd);
+
     return () => {
       window.removeEventListener('touchstart', onStart);
       window.removeEventListener('touchmove', onMove);
@@ -62,6 +64,7 @@ export function PullToRefresh({ top }: { top: number }) {
   }, [queryClient]);
 
   const visible = state !== 'idle';
+
   return (
     <Box
       role="status"

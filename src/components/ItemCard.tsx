@@ -1,6 +1,8 @@
-import { Box } from '@mui/material';
 import type { ReactNode } from 'react';
 import type { CardNumbers, QuarterBox } from '../lib/cardMath';
+
+import { Box } from '@mui/material';
+
 import { formatMoney, formatSignedPct } from '../lib/format';
 import { fonts, tokens } from '../theme/tokens';
 import { useNotify } from './notifyContext';

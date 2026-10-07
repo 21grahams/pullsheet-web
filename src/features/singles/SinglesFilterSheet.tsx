@@ -1,7 +1,11 @@
+import type { ChangeEvent } from 'react';
+import type { SinglesFilters } from '../../lib/singlesFilter';
+
 import { Button } from '@mui/material';
-import { useState, type ChangeEvent } from 'react';
+import { useState } from 'react';
+
 import { Field, Sheet } from '../../components/Sheet';
-import { emptyFilters, type SinglesFilters } from '../../lib/singlesFilter';
+import { emptyFilters } from '../../lib/singlesFilter';
 import { tokens } from '../../theme/tokens';
 
 interface Props {

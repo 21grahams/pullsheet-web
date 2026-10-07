@@ -1,4 +1,7 @@
-import { Button, CircularProgress, type ButtonProps } from '@mui/material';
+import type { ButtonProps } from '@mui/material';
+
+import { Button, CircularProgress } from '@mui/material';
+
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 
 interface SaveButtonProps extends Omit<ButtonProps, 'children'> {
@@ -9,6 +12,7 @@ interface SaveButtonProps extends Omit<ButtonProps, 'children'> {
 
 export function SaveButton({ pending, label, pendingLabel = 'Saving…', disabled, ...rest }: SaveButtonProps) {
   const online = useOnlineStatus();
+
   return (
     <Button
       variant="contained"

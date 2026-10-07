@@ -1,6 +1,7 @@
 import type { HoldStatus, SealedItem } from '../api/types';
-import { formatMoney } from './format';
+
 import { totals } from './cardMath';
+import { formatMoney } from './format';
 import { newestFirst } from './singlesFilter';
 
 export interface SealedGroup {
@@ -22,6 +23,7 @@ export function groupSealed(items: readonly SealedItem[]): SealedGroup[] {
   }
   const rank = (g: SealedGroup) => (g.status === 'long' ? -1 : 0);
   const number = (g: SealedGroup) => g.items[0]?.holdNumber ?? 0;
+
   return [...groups.values()]
     .sort((a, b) => rank(a) - rank(b) || number(b) - number(a))
     .map((g) => ({ ...g, items: newestFirst(g.items) }));
@@ -30,5 +32,6 @@ export function groupSealed(items: readonly SealedItem[]): SealedGroup[] {
 export function groupSummary(group: SealedGroup): string {
   const t = totals(group.items);
   const base = `${t.units} units · ${formatMoney(t.totalValue)}`;
+
   return group.status === 'long' ? `${base} · ${formatMoney(t.value80)} @80%` : base;
 }

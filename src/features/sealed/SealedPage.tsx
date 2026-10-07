@@ -1,6 +1,12 @@
+import type { SealedItem } from '../../api/types';
+import type { SealedGroup } from '../../lib/sealedGroups';
+import type { QuarterTarget } from '../items/QuarterSheet';
+import type { SellTarget } from '../items/SellSheet';
+import type { CompleteTarget } from './CompleteHoldSheet';
+
 import { Box } from '@mui/material';
 import { useMemo, useState } from 'react';
-import type { SealedItem } from '../../api/types';
+
 import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
@@ -8,14 +14,14 @@ import { EmptyState, ErrorState, LoadingState } from '../../components/ListState
 import { useAppContext, useSealed } from '../../hooks/queries';
 import { cardNumbers, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate } from '../../lib/format';
-import { groupSealed, groupSummary, type SealedGroup } from '../../lib/sealedGroups';
+import { groupSealed, groupSummary } from '../../lib/sealedGroups';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
 import { MoveSheet } from '../items/MoveSheet';
-import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
+import { QuarterSheet } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
-import { SellSheet, type SellTarget } from '../items/SellSheet';
-import { CompleteHoldSheet, type CompleteTarget } from './CompleteHoldSheet';
+import { SellSheet } from '../items/SellSheet';
+import { CompleteHoldSheet } from './CompleteHoldSheet';
 
 function GroupHeader({
   group,
@@ -104,6 +110,7 @@ function SealedCard({
   onMove: () => void;
 }) {
   const isLong = item.holdStatus === 'long';
+
   return (
     <ItemCard
       title={item.name}
@@ -152,6 +159,7 @@ export function SealedPage() {
   if (!sealed.data || !context.data) {
     if (sealed.isError) return <ErrorState error={sealed.error} onRetry={() => sealed.refetch()} />;
     if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
+
     return <LoadingState />;
   }
 
@@ -234,6 +242,7 @@ export function SealedPage() {
 
       {groups.map((group) => {
         const isCollapsed = !!collapsed[group.holdId];
+
         return (
           <Box key={group.holdId} sx={{ mb: 0.5 }}>
             <GroupHeader

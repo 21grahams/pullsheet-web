@@ -1,9 +1,13 @@
 import type { Session } from '@supabase/supabase-js';
+import type { ReactNode } from 'react';
+import type { AuthContextValue } from './authContext';
+
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+
 import { cachePersister } from '../../lib/queryClient';
 import { supabase } from '../../lib/supabase';
-import { AuthContext, friendlyAuthError, type AuthContextValue } from './authContext';
+import { AuthContext, friendlyAuthError } from './authContext';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
@@ -16,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
+
     return () => data.subscription.unsubscribe();
   }, []);
 
@@ -24,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     async signIn(email, password) {
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+
       return error ? friendlyAuthError(error.message) : null;
     },
     async signOut() {

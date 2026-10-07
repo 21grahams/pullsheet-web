@@ -1,6 +1,9 @@
+import type { FormEvent } from 'react';
+
 import { Alert, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { Navigate } from 'react-router';
+
 import { PracticeBanner } from '../../components/PracticeBanner';
 import { Wordmark } from '../../components/Wordmark';
 import { useAuth } from './authContext';

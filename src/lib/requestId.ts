@@ -12,6 +12,7 @@ function fnv1a(text: string): string {
     hash ^= text.charCodeAt(i);
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
+
   return hash.toString(16).padStart(8, '0');
 }
 

@@ -1,4 +1,7 @@
-import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
+import type { QueryKey } from '@tanstack/react-query';
+
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import * as api from '../api';
 import { useNotify } from '../components/notifyContext';
 import { queryKeys } from './queries';
@@ -17,6 +20,7 @@ function useSave<TVars, TResult>(
 ) {
   const queryClient = useQueryClient();
   const notify = useNotify();
+
   return useMutation({
     mutationFn: fn,
     onSuccess: async (result, vars) => {
