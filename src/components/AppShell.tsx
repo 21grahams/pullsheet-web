@@ -31,13 +31,16 @@ export function AppShell() {
     window.scrollTo(0, scrollByTab.current[pathname] ?? 0);
   }, [pathname]);
 
-  // The pull-to-refresh pill sits just under the header, whose height varies
-  // (notch, offline banner), so measure it.
+  // The header is fixed rather than sticky: iOS Safari skips painting a sticky
+  // header for a frame after the scroll jump when switching tabs. Its height
+  // varies (notch, offline banner), so measure it for the spacer and the
+  // pull-to-refresh pill, before the first paint to avoid a jump.
   const headerRef = useRef<HTMLElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(120);
-  useEffect(() => {
+  const [headerHeight, setHeaderHeight] = useState(0);
+  useLayoutEffect(() => {
     const el = headerRef.current;
     if (!el) return;
+    setHeaderHeight(el.offsetHeight);
     const observer = new ResizeObserver(() => setHeaderHeight(el.offsetHeight));
     observer.observe(el);
     return () => observer.disconnect();
@@ -49,8 +52,10 @@ export function AppShell() {
         component="header"
         ref={headerRef}
         sx={{
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
+          left: 0,
+          right: 0,
           zIndex: 100,
           backgroundColor: tokens.bg,
           borderBottom: `1px solid ${tokens.border}`,
@@ -77,6 +82,7 @@ export function AppShell() {
         </Tabs>
         <OfflineBanner />
       </Box>
+      <Box sx={{ height: headerHeight }} />
       <Box
         component="main"
         sx={{ maxWidth: 900, mx: 'auto', p: 2, pb: 'calc(16px + env(safe-area-inset-bottom))' }}

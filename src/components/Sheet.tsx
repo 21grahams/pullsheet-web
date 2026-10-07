@@ -1,5 +1,5 @@
 import { Box, Button, Drawer } from '@mui/material';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { fonts, tokens } from '../theme/tokens';
 
 interface SheetProps {
@@ -25,11 +25,22 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
   // never scrolls it back, so put the page back where it was on close.
   const [savedScroll, setSavedScroll] = useState(0);
   const [wasOpen, setWasOpen] = useState(open);
+  const [closeCount, setCloseCount] = useState(0);
   if (open !== wasOpen) {
     setWasOpen(open);
     if (open) setSavedScroll(window.scrollY);
+    else setCloseCount((n) => n + 1);
   }
   const restoreScroll = () => window.scrollTo(0, savedScroll);
+
+  // Restoring only after the slide-down shows the shifted page for a moment, so
+  // also restore as closing starts, while the backdrop still covers it.
+  useEffect(() => {
+    if (closeCount === 0) return;
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    const frame = requestAnimationFrame(() => window.scrollTo(0, savedScroll));
+    return () => cancelAnimationFrame(frame);
+  }, [closeCount, savedScroll]);
 
   return (
     <Drawer
