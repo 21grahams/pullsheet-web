@@ -12,6 +12,7 @@ import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
 import { useAppContext, useSealed } from '../../hooks/queries';
+import { useStickyState } from '../../hooks/useStickyState';
 import { cardNumbers, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary } from '../../lib/sealedGroups';
@@ -144,8 +145,8 @@ function SealedCard({
 export function SealedPage() {
   const sealed = useSealed();
   const context = useAppContext();
-  const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
-  const [allCollapsed, setAllCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useStickyState<Record<number, boolean>>('ui:sealed-collapsed', {}, true);
+  const [allCollapsed, setAllCollapsed] = useStickyState('ui:sealed-all-collapsed', false, true);
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<SealedItem | null>(null);
   const [removing, setRemoving] = useState<SealedItem | null>(null);

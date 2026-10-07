@@ -2,11 +2,11 @@ import type { RetailerAccount } from '../../api/types';
 import type { RetailerGroup } from '../../lib/retailers';
 
 import { Box } from '@mui/material';
-import { useState } from 'react';
 
 import { CardButton } from '../../components/CardActions';
 import { ErrorState, LoadingState } from '../../components/ListStates';
 import { useAccounts } from '../../hooks/queries';
+import { useStickyState } from '../../hooks/useStickyState';
 import { groupAccounts } from '../../lib/retailers';
 import { fonts, tokens } from '../../theme/tokens';
 
@@ -65,8 +65,8 @@ function AccountCard({
 }
 
 function Group({ group, ...handlers }: { group: RetailerGroup } & CardHandlers) {
-  // Starts collapsed so emails and card digits only show when you open a group.
-  const [collapsed, setCollapsed] = useState(true);
+  // Starts collapsed on each launch so emails and card digits only show when you open a group.
+  const [collapsed, setCollapsed] = useStickyState(`ui:accounts-collapsed:${group.retailer}`, true);
   const n = group.accounts.length;
 
   return (

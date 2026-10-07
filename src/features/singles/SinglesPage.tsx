@@ -11,6 +11,7 @@ import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
 import { useAppContext, useSingles } from '../../hooks/queries';
+import { useStickyState } from '../../hooks/useStickyState';
 import { cardNumbers, cardsLabel, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate, formatMoney, formatSignedPct } from '../../lib/format';
 import { activeFilterCount, emptyFilters, filterOptions, filterSingles } from '../../lib/singlesFilter';
@@ -91,8 +92,8 @@ function SummaryTile({
 export function SinglesPage() {
   const singles = useSingles();
   const context = useAppContext();
-  const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState<SinglesFilters>(emptyFilters);
+  const [search, setSearch] = useStickyState('ui:singles-search', '');
+  const [filters, setFilters] = useStickyState<SinglesFilters>('ui:singles-filters', emptyFilters);
   const [filterOpen, setFilterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<Single | null>(null);

@@ -5,6 +5,7 @@ import type { AuthContextValue } from './authContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
+import { clearStickyMemory } from '../../hooks/useStickyState';
 import { cachePersister } from '../../lib/queryClient';
 import { supabase } from '../../lib/supabase';
 import { AuthContext, friendlyAuthError } from './authContext';
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut({ scope: 'local' });
       // Drop every piece of loaded data so nothing lingers on the device.
       queryClient.clear();
+      clearStickyMemory();
       await cachePersister.removeClient();
     },
   };
