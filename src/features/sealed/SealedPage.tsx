@@ -13,6 +13,7 @@ import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
 import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
+import { SellSheet, type SellTarget } from '../items/SellSheet';
 
 function GroupHeader({
   group,
@@ -88,12 +89,14 @@ function SealedCard({
   onEdit,
   onRemove,
   onQuarter,
+  onSell,
 }: {
   item: SealedItem;
   year: number;
   onEdit: () => void;
   onRemove: () => void;
   onQuarter: (quarter: 1 | 2 | 3 | 4) => void;
+  onSell: () => void;
 }) {
   const isLong = item.holdStatus === 'long';
   return (
@@ -113,7 +116,7 @@ function SealedCard({
         <>
           <CardButton onClick={onEdit}>Edit</CardButton>
           {isLong && (
-            <CardButton variant="green" disabled>
+            <CardButton variant="green" onClick={onSell}>
               Mark Sold
             </CardButton>
           )}
@@ -136,6 +139,7 @@ export function SealedPage() {
   const [editing, setEditing] = useState<SealedItem | null>(null);
   const [removing, setRemoving] = useState<SealedItem | null>(null);
   const [quarterTarget, setQuarterTarget] = useState<QuarterTarget | null>(null);
+  const [selling, setSelling] = useState<SellTarget | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
@@ -166,6 +170,7 @@ export function SealedPage() {
     <>
       <AddButton label="Add sealed product" onClick={() => setAddOpen(true)} />
       <QuarterSheet target={quarterTarget} onClose={() => setQuarterTarget(null)} />
+      <SellSheet target={selling} onClose={() => setSelling(null)} />
       <RemoveItemDialog
         target={removing && { kind: 'sealed', item: removing }}
         onClose={() => setRemoving(null)}
@@ -232,6 +237,16 @@ export function SealedPage() {
                     year={context.data.year}
                     onEdit={() => setEditing(item)}
                     onRemove={() => setRemoving(item)}
+                    onSell={() =>
+                      setSelling({
+                        kind: 'sealed',
+                        id: item.id,
+                        name: item.name,
+                        quantity: item.quantity,
+                        unitCost: cardNumbers(item).unitCost,
+                        unitValue: item.unitValue,
+                      })
+                    }
                     onQuarter={(quarter) =>
                       setQuarterTarget({
                         item: { sealedItemId: item.id },

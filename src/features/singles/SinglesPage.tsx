@@ -19,6 +19,7 @@ import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
 import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
+import { SellSheet, type SellTarget } from '../items/SellSheet';
 import { SinglesFilterSheet } from './SinglesFilterSheet';
 
 /** "Qty: 1 · 10/05/2026 · NM · [PULLED]" */
@@ -99,6 +100,7 @@ export function SinglesPage() {
   const [editing, setEditing] = useState<Single | null>(null);
   const [removing, setRemoving] = useState<Single | null>(null);
   const [quarterTarget, setQuarterTarget] = useState<QuarterTarget | null>(null);
+  const [selling, setSelling] = useState<SellTarget | null>(null);
 
   const all = useMemo(() => singles.data ?? [], [singles.data]);
   const shown = useMemo(() => filterSingles(all, search, filters), [all, search, filters]);
@@ -255,7 +257,19 @@ export function SinglesPage() {
                 actions={
                   <>
                     <CardButton onClick={() => setEditing(s)}>Edit</CardButton>
-                    <CardButton variant="green" disabled>
+                    <CardButton
+                      variant="green"
+                      onClick={() =>
+                        setSelling({
+                          kind: 'single',
+                          id: s.id,
+                          name: `${cardTitle(s)} (${s.condition})`,
+                          quantity: s.quantity,
+                          unitCost: cardNumbers(s).unitCost,
+                          unitValue: s.unitValue,
+                        })
+                      }
+                    >
                       Mark Sold
                     </CardButton>
                     <CardButton variant="danger" onClick={() => setRemoving(s)}>
@@ -285,6 +299,7 @@ export function SinglesPage() {
       />
 
       <QuarterSheet target={quarterTarget} onClose={() => setQuarterTarget(null)} />
+      <SellSheet target={selling} onClose={() => setSelling(null)} />
       <RemoveItemDialog
         target={removing && { kind: 'single', item: removing }}
         onClose={() => setRemoving(null)}

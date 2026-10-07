@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material';
 import { useState } from 'react';
 import { FieldRow, MoneyInput, Segmented, Stepper, TextInput } from '../../components/form';
-import { useNotify } from '../../components/notifyContext';
 import { SaveButton } from '../../components/SaveButton';
 import { Field, Sheet } from '../../components/Sheet';
 import type { SealedItem, Single } from '../../api/types';
@@ -51,7 +50,6 @@ function LinkButton({ onClick, children }: { onClick: () => void; children: stri
 }
 
 export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
-  const notify = useNotify();
   const session = useSaveSession();
   const addSingle = useAddSingle();
   const addSealed = useAddSealed();
@@ -85,12 +83,10 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
 
   const pending = addSingle.isPending || addSealed.isPending || editSingle.isPending || editSealed.isPending;
 
+  const problem = validateItemForm(kind, form);
+
   function submit() {
-    const problem = validateItemForm(kind, form);
-    if (problem) {
-      notify(problem, 'error');
-      return;
-    }
+    if (problem) return;
     const done = { onSuccess: onClose };
     const prefill = original ?? undefined;
     if (kind === 'single') {
@@ -114,12 +110,14 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
       open={open}
       onClose={onClose}
       title={`${isEdit ? 'Edit' : 'Add'} ${kind === 'single' ? 'Single Card' : 'Sealed Product'}`}
+      hint={problem}
       footer={
         <>
           <Button variant="outlined" color="inherit" onClick={onClose} sx={{ py: 1.5, fontSize: 15 }}>
             Cancel
           </Button>
           <SaveButton
+            disabled={!!problem}
             pending={pending}
             label={isEdit ? 'Save Changes' : 'Add to Collection'}
             pendingLabel={isEdit ? 'Saving…' : 'Adding…'}

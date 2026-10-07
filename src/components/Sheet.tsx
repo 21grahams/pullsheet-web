@@ -10,6 +10,8 @@ interface SheetProps {
   children: ReactNode;
   /** Buttons pinned under a divider, e.g. Cancel + the primary action. */
   footer?: ReactNode;
+  /** Why the primary action is disabled, shown above the buttons. */
+  hint?: string | null;
 }
 
 /**
@@ -18,7 +20,7 @@ interface SheetProps {
  * at most 92% of the screen tall, closes on tapping outside. The handle bar is
  * decorative (it never dragged in the old app either).
  */
-export function Sheet({ open, onClose, title, subtitle, children, footer }: SheetProps) {
+export function Sheet({ open, onClose, title, subtitle, children, footer, hint }: SheetProps) {
   return (
     <Drawer
       anchor="bottom"
@@ -50,6 +52,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer }: Shee
       </Box>
       {subtitle && <Box sx={{ fontSize: 13, color: tokens.text2, mb: 2.5 }}>{subtitle}</Box>}
       {children}
+      {hint && <Box sx={{ fontSize: 12, color: tokens.text3, textAlign: 'center', mt: 2 }}>{hint}</Box>}
       {footer && (
         <Box
           sx={{

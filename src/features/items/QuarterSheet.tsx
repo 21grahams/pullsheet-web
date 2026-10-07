@@ -1,7 +1,6 @@
 import { Button } from '@mui/material';
 import { useState } from 'react';
 import { MoneyInput } from '../../components/form';
-import { useNotify } from '../../components/notifyContext';
 import { SaveButton } from '../../components/SaveButton';
 import { Field, Sheet } from '../../components/Sheet';
 import { useSetQuarterPrice } from '../../hooks/mutations';
@@ -20,7 +19,6 @@ export interface QuarterTarget {
 const toInputText = (n: number) => String(Math.round(n * 100) / 100);
 
 export function QuarterSheet({ target, onClose }: { target: QuarterTarget | null; onClose: () => void }) {
-  const notify = useNotify();
   const session = useSaveSession();
   const setQuarter = useSetQuarterPrice();
   const [shown, setShown] = useState<QuarterTarget | null>(target);
@@ -32,13 +30,13 @@ export function QuarterSheet({ target, onClose }: { target: QuarterTarget | null
     session.reset();
   }
 
+  const unitValue = Number.parseFloat(value.replace(/[$,\s]/g, ''));
+  const problem =
+    !Number.isFinite(unitValue) || unitValue < 0 ? 'Enter a value (0 clears the quarter)' : null;
+
   function submit() {
     if (!target) return;
-    const unitValue = Number.parseFloat(value.replace(/[$,\s]/g, ''));
-    if (!Number.isFinite(unitValue) || unitValue < 0) {
-      notify('Invalid value', 'error');
-      return;
-    }
+    if (problem) return;
     const vars = { item: target.item, quarter: target.quarter, unitValue };
     setQuarter.mutate({ requestId: session.idFor(vars), ...vars }, { onSuccess: onClose });
   }
@@ -49,12 +47,14 @@ export function QuarterSheet({ target, onClose }: { target: QuarterTarget | null
       onClose={onClose}
       title={shown ? `Update Q${shown.quarter} Market Value` : ''}
       subtitle={shown?.name}
+      hint={problem}
       footer={
         <>
           <Button variant="outlined" color="inherit" onClick={onClose} sx={{ py: 1.5, fontSize: 15 }}>
             Cancel
           </Button>
           <SaveButton
+            disabled={!!problem}
             pending={setQuarter.isPending}
             label="Save"
             onClick={submit}
