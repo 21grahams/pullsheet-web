@@ -1,11 +1,12 @@
 const parse = (text: string) => Number.parseFloat(text.replace(/[$,\s]/g, ''));
+const cents = (n: number) => Math.round(n * 100) / 100;
 
-/** Sold price minus the cost of the units sold; blank until a price is typed (0 is a valid trade). */
-export function autoProfit(soldPrice: string, unitCost: number, quantitySold: number): string {
+/** Sold price minus cost, to the cent; null until a price is typed (0 is a valid trade). */
+export function profitFor(soldPrice: string, cost: number): number | null {
   const price = parse(soldPrice);
-  if (soldPrice.trim() === '' || !Number.isFinite(price)) return '';
+  if (soldPrice.trim() === '' || !Number.isFinite(price)) return null;
 
-  return (price - unitCost * quantitySold).toFixed(2);
+  return cents(price - cost);
 }
 
 export function partialSaleNote(owned: number, selling: number, listName: string): string {
@@ -20,9 +21,9 @@ export type SaleValidation = { error: string } | { soldPrice: number; profit: nu
 
 export function validateSale(
   soldPrice: string,
-  profit: string,
   quantitySold: number,
   owned: number,
+  unitCost: number,
 ): SaleValidation {
   const price = parse(soldPrice);
   if (soldPrice.trim() === '' || !Number.isFinite(price) || price < 0) {
@@ -30,23 +31,13 @@ export function validateSale(
   }
   if (quantitySold < 1) return { error: 'Enter qty sold' };
   if (quantitySold > owned) return { error: `You only have ${owned}` };
-  const p = parse(profit);
 
-  return { soldPrice: price, profit: Number.isFinite(p) ? p : 0 };
+  return { soldPrice: price, profit: cents(price - unitCost * quantitySold) };
 }
 
-export function validateHoldSale(soldPrice: string, profit: string): SaleValidation {
+export function validateHoldSale(soldPrice: string, spent: number): SaleValidation {
   const price = parse(soldPrice);
   if (!Number.isFinite(price) || price <= 0) return { error: 'Enter a valid sold price' };
-  const p = parse(profit);
-  if (!Number.isFinite(p)) return { error: 'Enter profit amount' };
 
-  return { soldPrice: price, profit: p };
-}
-
-/** The iPhone decimal keypad has no minus key, so losses are entered with a ± button. */
-export function flipSign(text: string): string {
-  const t = text.trim();
-
-  return t.startsWith('-') ? t.slice(1) : `-${t}`;
+  return { soldPrice: price, profit: cents(price - spent) };
 }

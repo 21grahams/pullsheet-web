@@ -265,7 +265,6 @@ export function SinglesPage() {
                           name: `${cardTitle(s)} (${s.condition})`,
                           quantity: s.quantity,
                           unitCost: cardNumbers(s).unitCost,
-                          unitValue: s.unitValue,
                         })
                       }
                     >

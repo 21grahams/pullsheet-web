@@ -2,13 +2,13 @@ import { Box } from '@mui/material';
 import { useState } from 'react';
 
 import { greenButtonSx } from '../../components/buttonStyles';
-import { FieldRow, MoneyInput, ProfitInput, Stepper } from '../../components/form';
+import { FieldRow, MoneyInput, ProfitDisplay, Select } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
 import { CancelButton, Field, Sheet } from '../../components/Sheet';
 import { useSellLongHoldItem, useSellSingle } from '../../hooks/mutations';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import { formatMoney } from '../../lib/format';
-import { autoProfit, partialSaleNote, validateSale } from '../../lib/sellForm';
+import { partialSaleNote, profitFor, validateSale } from '../../lib/sellForm';
 import { tokens } from '../../theme/tokens';
 
 export interface SellTarget {
@@ -17,7 +17,6 @@ export interface SellTarget {
   name: string;
   quantity: number;
   unitCost: number;
-  unitValue: number | null;
 }
 
 export function SellSheet({ target, onClose }: { target: SellTarget | null; onClose: () => void }) {
@@ -27,29 +26,18 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
   const [shown, setShown] = useState<SellTarget | null>(target);
   const [quantity, setQuantity] = useState(1);
   const [soldPrice, setSoldPrice] = useState('');
-  const [profit, setProfit] = useState('');
 
   if (target && target !== shown) {
     setShown(target);
     setQuantity(target.quantity);
     setSoldPrice('');
-    setProfit('');
     session.reset();
   }
 
   const listName = shown?.kind === 'single' ? 'Singles' : 'Long Hold';
 
-  function changeQuantity(n: number) {
-    setQuantity(n);
-    if (shown) setProfit(autoProfit(soldPrice, shown.unitCost, n));
-  }
-
-  function changePrice(text: string) {
-    setSoldPrice(text);
-    if (shown) setProfit(autoProfit(text, shown.unitCost, quantity));
-  }
-
-  const validation = validateSale(soldPrice, profit, quantity, shown?.quantity ?? 0);
+  const profit = profitFor(soldPrice, (shown?.unitCost ?? 0) * quantity);
+  const validation = validateSale(soldPrice, quantity, shown?.quantity ?? 0, shown?.unitCost ?? 0);
   const problem = 'error' in validation ? validation.error : null;
 
   function submit() {
@@ -70,12 +58,10 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
         shown && (
           <>
             {shown.name}
-            {shown.unitValue != null && (
-              <Box sx={{ fontSize: 12, color: tokens.text3, mt: 0.5 }}>
-                Market value {formatMoney(shown.unitValue)} each · {formatMoney(shown.unitValue * quantity)}{' '}
-                for {quantity}
-              </Box>
-            )}
+            <Box sx={{ fontSize: 12, color: tokens.text3, mt: 0.5 }}>
+              Cost {formatMoney(shown.unitCost)} each · {formatMoney(shown.unitCost * quantity)} for{' '}
+              {quantity}
+            </Box>
           </>
         )
       }
@@ -94,23 +80,28 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
         </>
       }
     >
-      <FieldRow columns="112px 1fr">
-        <Field label="Qty Sold">
-          <Stepper
+      <FieldRow columns="72px 1fr 1fr">
+        <Field label="Qty">
+          <Select
+            aria-label="quantity sold"
             value={quantity}
-            min={1}
-            max={shown?.quantity ?? 1}
-            onChange={changeQuantity}
-            ariaLabel="quantity sold"
-          />
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            style={{ textAlign: 'center', textAlignLast: 'center' }}
+          >
+            {Array.from({ length: shown?.quantity ?? 1 }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </Select>
         </Field>
-        <Field label="Total Sold Price">
-          <MoneyInput value={soldPrice} onChange={(e) => changePrice(e.target.value)} />
+        <Field label="Sold Price">
+          <MoneyInput value={soldPrice} onChange={(e) => setSoldPrice(e.target.value)} />
+        </Field>
+        <Field label="Profit">
+          <ProfitDisplay profit={profit} />
         </Field>
       </FieldRow>
-      <Field label="Profit (auto-calculated)">
-        <ProfitInput value={profit} onChange={setProfit} />
-      </Field>
       {shown && (
         <Box sx={{ fontSize: 11, color: tokens.text3 }}>
           {partialSaleNote(shown.quantity, quantity, listName)}

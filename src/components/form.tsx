@@ -1,8 +1,8 @@
-import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
+import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
 
 import { Box } from '@mui/material';
 
-import { flipSign } from '../lib/sellForm';
+import { formatMoney } from '../lib/format';
 import { fonts, tokens } from '../theme/tokens';
 
 const inputSx = {
@@ -43,30 +43,26 @@ export function MoneyInput(props: InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
-export function ProfitInput({ value, onChange }: { value: string; onChange: (text: string) => void }) {
+/** Native select: on iPhone it opens the system wheel picker. */
+export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
+  return <Box component="select" sx={inputSx} {...props} />;
+}
+
+export function ProfitDisplay({ profit }: { profit: number | null }) {
   return (
-    <Box sx={{ position: 'relative' }}>
-      <MoneyInput value={value} onChange={(e) => onChange(e.target.value)} style={{ paddingRight: 44 }} />
-      <Box
-        component="button"
-        type="button"
-        aria-label="make negative or positive"
-        onClick={() => onChange(flipSign(value))}
-        sx={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          height: '100%',
-          width: 40,
-          background: 'none',
-          border: 'none',
-          color: tokens.text2,
-          fontSize: 18,
-          cursor: 'pointer',
-        }}
-      >
-        ±
-      </Box>
+    <Box
+      aria-live="polite"
+      sx={{
+        ...inputSx,
+        backgroundColor: 'transparent',
+        fontFamily: fonts.mono,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        color: profit == null ? tokens.text3 : profit >= 0 ? tokens.green : tokens.red,
+      }}
+    >
+      {profit == null ? '—' : formatMoney(profit)}
     </Box>
   );
 }

@@ -2,13 +2,13 @@ import { Box } from '@mui/material';
 import { useState } from 'react';
 
 import { greenButtonSx } from '../../components/buttonStyles';
-import { FieldRow, MoneyInput, ProfitInput } from '../../components/form';
+import { FieldRow, MoneyInput, ProfitDisplay } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
 import { CancelButton, Field, Sheet } from '../../components/Sheet';
 import { useCompleteShortHold } from '../../hooks/mutations';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import { formatMoney } from '../../lib/format';
-import { autoProfit, validateHoldSale } from '../../lib/sellForm';
+import { profitFor, validateHoldSale } from '../../lib/sellForm';
 import { tokens } from '../../theme/tokens';
 
 export interface CompleteTarget {
@@ -27,21 +27,15 @@ export function CompleteHoldSheet({
   const complete = useCompleteShortHold();
   const [shown, setShown] = useState<CompleteTarget | null>(target);
   const [soldPrice, setSoldPrice] = useState('');
-  const [profit, setProfit] = useState('');
 
   if (target && target !== shown) {
     setShown(target);
     setSoldPrice('');
-    setProfit('');
     session.reset();
   }
 
-  function changePrice(text: string) {
-    setSoldPrice(text);
-    if (shown) setProfit(autoProfit(text, shown.spent, 1));
-  }
-
-  const validation = validateHoldSale(soldPrice, profit);
+  const profit = profitFor(soldPrice, shown?.spent ?? 0);
+  const validation = validateHoldSale(soldPrice, shown?.spent ?? 0);
   const problem = 'error' in validation ? validation.error : null;
 
   function submit() {
@@ -73,10 +67,10 @@ export function CompleteHoldSheet({
     >
       <FieldRow>
         <Field label="Sold Price (total)">
-          <MoneyInput placeholder="0.00" value={soldPrice} onChange={(e) => changePrice(e.target.value)} />
+          <MoneyInput placeholder="0.00" value={soldPrice} onChange={(e) => setSoldPrice(e.target.value)} />
         </Field>
         <Field label="Profit">
-          <ProfitInput value={profit} onChange={setProfit} />
+          <ProfitDisplay profit={profit} />
         </Field>
       </FieldRow>
       <Box sx={{ fontSize: 11, color: tokens.text3 }}>

@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import { autoProfit, flipSign, partialSaleNote, validateHoldSale, validateSale } from './sellForm';
+import { partialSaleNote, profitFor, validateHoldSale, validateSale } from './sellForm';
 
-describe('autoProfit', () => {
-  it('is sold price minus unit cost × quantity sold', () => {
-    expect(autoProfit('120', 88.39, 1)).toBe('31.61');
-    expect(autoProfit('300', 191.1666666667, 2)).toBe('-82.33');
+describe('profitFor', () => {
+  it('is sold price minus cost, to the cent', () => {
+    expect(profitFor('120', 88.39)).toBe(31.61);
+    expect(profitFor('300', 191.1666666667 * 2)).toBe(-82.33);
   });
   it('treats $0 as a trade, not as blank', () => {
-    expect(autoProfit('0', 25, 1)).toBe('-25.00');
+    expect(profitFor('0', 25)).toBe(-25);
   });
-  it('stays blank until a price is typed', () => {
-    expect(autoProfit('', 25, 1)).toBe('');
-    expect(autoProfit('abc', 25, 1)).toBe('');
+  it('stays empty until a price is typed', () => {
+    expect(profitFor('', 25)).toBeNull();
+    expect(profitFor('abc', 25)).toBeNull();
   });
 });
 
@@ -28,35 +28,24 @@ describe('partialSaleNote', () => {
 });
 
 describe('validateSale', () => {
-  it('allows $0 (trades) but not blank', () => {
-    expect(validateSale('0', '-25', 1, 1)).toEqual({ soldPrice: 0, profit: -25 });
-    expect(validateSale('', '', 1, 1)).toEqual({ error: 'Enter a sold price (0 or more, e.g. for trades)' });
-    expect(validateSale('-5', '', 1, 1)).toEqual({
-      error: 'Enter a sold price (0 or more, e.g. for trades)',
-    });
+  it('allows $0 (trades) but not blank or negative', () => {
+    expect(validateSale('0', 1, 1, 25)).toEqual({ soldPrice: 0, profit: -25 });
+    const error = { error: 'Enter a sold price (0 or more, e.g. for trades)' };
+    expect(validateSale('', 1, 1, 25)).toEqual(error);
+    expect(validateSale('-5', 1, 1, 25)).toEqual(error);
   });
   it("won't sell more than you own", () => {
-    expect(validateSale('10', '1', 3, 2)).toEqual({ error: 'You only have 2' });
+    expect(validateSale('10', 3, 2, 1)).toEqual({ error: 'You only have 2' });
   });
-  it('uses the (possibly edited) profit, defaulting to 0', () => {
-    expect(validateSale('$1,350', '1300', 1, 1)).toEqual({ soldPrice: 1350, profit: 1300 });
-    expect(validateSale('10', '', 1, 1)).toEqual({ soldPrice: 10, profit: 0 });
+  it('calculates profit from the units sold', () => {
+    expect(validateSale('$1,350', 2, 3, 25.005)).toEqual({ soldPrice: 1350, profit: 1299.99 });
   });
 });
 
 describe('validateHoldSale', () => {
-  it('needs a sold price above 0 (no trades) and a profit', () => {
-    expect(validateHoldSale('', '')).toEqual({ error: 'Enter a valid sold price' });
-    expect(validateHoldSale('0', '-10')).toEqual({ error: 'Enter a valid sold price' });
-    expect(validateHoldSale('500', '')).toEqual({ error: 'Enter profit amount' });
-    expect(validateHoldSale('$1,200', '-41.55')).toEqual({ soldPrice: 1200, profit: -41.55 });
-  });
-});
-
-describe('flipSign', () => {
-  it('toggles a leading minus', () => {
-    expect(flipSign('25.50')).toBe('-25.50');
-    expect(flipSign('-25.50')).toBe('25.50');
-    expect(flipSign('')).toBe('-');
+  it('needs a sold price above 0 (no trades) and calculates profit', () => {
+    expect(validateHoldSale('', 457.15)).toEqual({ error: 'Enter a valid sold price' });
+    expect(validateHoldSale('0', 457.15)).toEqual({ error: 'Enter a valid sold price' });
+    expect(validateHoldSale('$600', 457.15)).toEqual({ soldPrice: 600, profit: 142.85 });
   });
 });

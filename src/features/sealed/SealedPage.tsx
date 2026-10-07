@@ -240,7 +240,6 @@ export function SealedPage() {
                         name: item.name,
                         quantity: item.quantity,
                         unitCost: cardNumbers(item).unitCost,
-                        unitValue: item.unitValue,
                       })
                     }
                     onQuarter={(quarter) =>
