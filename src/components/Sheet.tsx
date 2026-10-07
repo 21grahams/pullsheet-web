@@ -1,5 +1,5 @@
 import { Box, Drawer } from '@mui/material';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { fonts, tokens } from '../theme/tokens';
 
 interface SheetProps {
@@ -21,12 +21,24 @@ interface SheetProps {
  * decorative (it never dragged in the old app either).
  */
 export function Sheet({ open, onClose, title, subtitle, children, footer, hint }: SheetProps) {
+  // iOS scrolls the page under the sheet to make room for the keyboard and
+  // never scrolls it back, so put the page back where it was on close.
+  const [savedScroll, setSavedScroll] = useState(0);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setSavedScroll(window.scrollY);
+  }
+  const restoreScroll = () => window.scrollTo(0, savedScroll);
+
   return (
     <Drawer
       anchor="bottom"
       open={open}
       onClose={onClose}
+      disableRestoreFocus
       slotProps={{
+        transition: { onExited: restoreScroll },
         backdrop: { sx: { backgroundColor: 'rgba(0,0,0,0.75)' } },
         paper: {
           sx: {

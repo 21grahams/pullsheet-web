@@ -60,6 +60,10 @@ Rules:
 
 ## Status
 
+- Phase 4 polish note: after a sheet closes on iPhone, the page briefly shows iOS's keyboard
+  offset before scroll is restored (restore currently waits for the slide-down). Try restoring
+  earlier.
+
 - Phase 0 (backend auth/RLS/API): done.
 - Phase 1 (scaffold, theme, login, shell, PWA, CI): done 2026-10-06.
 - Next: Phase 2, read-only screens (Singles with search/filters, Sealed groups, Summary,
