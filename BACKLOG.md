@@ -11,3 +11,9 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
 - **Enforce valid conditions in the database.** After cutover (when the old app's free-text name
   field can no longer write), add a database rule matching the app's: NM/LP/MP/HP/DMG, or
   PSA/BGS/CGC/SGC/TAG with a grade from 1 to 10 in half steps.
+- **One card per sealed product per hold (first after cutover).** Adding or moving a product
+  into a hold that already has it (same name, ignoring case and spaces) merges into that card:
+  quantity, cost and PAS fees add up; the existing card's quarter values are kept; the earliest
+  purchase date wins; the absorbed row is soft-deleted so sales history still links. Edit blocks
+  a rename that would create a duplicate ("Already in this hold — use Add to increase qty").
+  Change lives in the database functions; check production for existing duplicates first.

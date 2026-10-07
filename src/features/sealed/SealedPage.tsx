@@ -11,6 +11,7 @@ import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary, type SealedGroup } from '../../lib/sealedGroups';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
+import { MoveSheet } from '../items/MoveSheet';
 import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
 import { SellSheet, type SellTarget } from '../items/SellSheet';
@@ -90,6 +91,7 @@ function SealedCard({
   onRemove,
   onQuarter,
   onSell,
+  onMove,
 }: {
   item: SealedItem;
   year: number;
@@ -97,6 +99,7 @@ function SealedCard({
   onRemove: () => void;
   onQuarter: (quarter: 1 | 2 | 3 | 4) => void;
   onSell: () => void;
+  onMove: () => void;
 }) {
   const isLong = item.holdStatus === 'long';
   return (
@@ -120,7 +123,7 @@ function SealedCard({
               Mark Sold
             </CardButton>
           )}
-          {item.holdStatus !== 'historical' && <CardButton disabled>Move</CardButton>}
+          {item.holdStatus !== 'historical' && <CardButton onClick={onMove}>Move</CardButton>}
           <CardButton variant="danger" onClick={onRemove}>
             Remove
           </CardButton>
@@ -140,6 +143,7 @@ export function SealedPage() {
   const [removing, setRemoving] = useState<SealedItem | null>(null);
   const [quarterTarget, setQuarterTarget] = useState<QuarterTarget | null>(null);
   const [selling, setSelling] = useState<SellTarget | null>(null);
+  const [moving, setMoving] = useState<SealedItem | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
@@ -171,6 +175,11 @@ export function SealedPage() {
       <AddButton label="Add sealed product" onClick={() => setAddOpen(true)} />
       <QuarterSheet target={quarterTarget} onClose={() => setQuarterTarget(null)} />
       <SellSheet target={selling} onClose={() => setSelling(null)} />
+      <MoveSheet
+        item={moving}
+        currentShortHoldName={context.data.currentShortHoldName}
+        onClose={() => setMoving(null)}
+      />
       <RemoveItemDialog
         target={removing && { kind: 'sealed', item: removing }}
         onClose={() => setRemoving(null)}
@@ -237,6 +246,7 @@ export function SealedPage() {
                     year={context.data.year}
                     onEdit={() => setEditing(item)}
                     onRemove={() => setRemoving(item)}
+                    onMove={() => setMoving(item)}
                     onSell={() =>
                       setSelling({
                         kind: 'sealed',
