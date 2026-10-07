@@ -2,12 +2,14 @@ import type { SealedItem, Single } from '../../api/types';
 import type { ItemFormOriginal, ItemFormValues, ItemKind } from '../../lib/itemForm';
 
 import { Box } from '@mui/material';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { AutocompleteInput } from '../../components/AutocompleteInput';
 import { FieldRow, MoneyInput, Segmented, Stepper, TextInput } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
 import { CancelButton, Field, Sheet } from '../../components/Sheet';
 import { useAddSealed, useAddSingle, useEditSealed, useEditSingle } from '../../hooks/mutations';
+import { useSealed, useSingles } from '../../hooks/queries';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import {
   emptyItemForm,
@@ -17,6 +19,7 @@ import {
   toSingleInput,
   validateItemForm,
 } from '../../lib/itemForm';
+import { suggestionList } from '../../lib/suggestions';
 import { tokens } from '../../theme/tokens';
 import { ConditionPicker } from './ConditionPicker';
 
@@ -78,6 +81,17 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
 
   const set = <K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
+  const singles = useSingles();
+  const sealed = useSealed();
+  const suggestions = useMemo(
+    () => ({
+      pokemon: suggestionList((singles.data ?? []).map((x) => x.pokemon)),
+      setName: suggestionList((singles.data ?? []).map((x) => x.setName)),
+      name: suggestionList((sealed.data ?? []).map((x) => x.name)),
+    }),
+    [singles.data, sealed.data],
+  );
+
   const text = (key: keyof ItemFormValues) => ({
     value: form[key] as string,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => set(key, e.target.value as never),
@@ -150,11 +164,22 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
       <FieldRow columns="1fr 112px">
         {kind === 'single' ? (
           <Field label="Pokémon" error={shown.pokemon}>
-            <TextInput placeholder="e.g. Charizard ex" autoCapitalize="words" {...text('pokemon')} />
+            <AutocompleteInput
+              placeholder="e.g. Charizard ex"
+              autoCapitalize="words"
+              value={form.pokemon}
+              onChange={(v) => set('pokemon', v)}
+              options={suggestions.pokemon}
+            />
           </Field>
         ) : (
           <Field label="Product Name" error={shown.name}>
-            <TextInput placeholder="e.g. Prismatic Evolutions ETB" {...text('name')} />
+            <AutocompleteInput
+              placeholder="e.g. Prismatic Evolutions ETB"
+              value={form.name}
+              onChange={(v) => set('name', v)}
+              options={suggestions.name}
+            />
           </Field>
         )}
         <Field label="Qty">
@@ -165,7 +190,12 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
       {kind === 'single' && (
         <>
           <Field label="Set" error={shown.setName}>
-            <TextInput placeholder="e.g. Obsidian Flames" {...text('setName')} />
+            <AutocompleteInput
+              placeholder="e.g. Obsidian Flames"
+              value={form.setName}
+              onChange={(v) => set('setName', v)}
+              options={suggestions.setName}
+            />
           </Field>
           <Field label="Condition" error={shown.condition}>
             <ConditionPicker key={openCount} value={form.condition} onChange={(c) => set('condition', c)} />
@@ -218,7 +248,12 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
         (showTag ? (
           <>
             <Field label="Tag (Optional)">
-              <TextInput placeholder="e.g. PULLED" autoCapitalize="characters" {...text('extra')} />
+              <TextInput
+                placeholder="e.g. PULLED"
+                autoCapitalize="characters"
+                onFocus={(e) => e.target.select()}
+                {...text('extra')}
+              />
             </Field>
             <LinkButton
               onClick={() => {
