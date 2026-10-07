@@ -17,3 +17,8 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   purchase date wins; the absorbed row is soft-deleted so sales history still links. Edit blocks
   a rename that would create a duplicate ("Already in this hold — use Add to increase qty").
   Change lives in the database functions; check production for existing duplicates first.
+- **Guard against a mistyped profit (Mark Sold and Complete Short Hold).** Profit is editable
+  (shipping, platform fees) but nothing checks it, and a completed hold can't be edited, so a
+  typo like 100,000 skews Summary until fixed in the database. Options: keep sold price and
+  profit linked both ways (editing profit updates sold price = cost + profit), or a soft warning
+  when profit is far from sold − cost. Decide which before building.

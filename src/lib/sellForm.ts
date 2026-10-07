@@ -31,3 +31,17 @@ export function validateSale(
   const p = parse(profit);
   return { soldPrice: price, profit: Number.isFinite(p) ? p : 0 };
 }
+
+export function validateHoldSale(soldPrice: string, profit: string): SaleValidation {
+  const price = parse(soldPrice);
+  if (!Number.isFinite(price) || price <= 0) return { error: 'Enter a valid sold price' };
+  const p = parse(profit);
+  if (!Number.isFinite(p)) return { error: 'Enter profit amount' };
+  return { soldPrice: price, profit: p };
+}
+
+/** The iPhone decimal keypad has no minus key, so losses are entered with a ± button. */
+export function flipSign(text: string): string {
+  const t = text.trim();
+  return t.startsWith('-') ? t.slice(1) : `-${t}`;
+}

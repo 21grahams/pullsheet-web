@@ -1,8 +1,9 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { useState } from 'react';
-import { FieldRow, MoneyInput, Stepper, TextInput } from '../../components/form';
+import { FieldRow, MoneyInput, ProfitInput, Stepper } from '../../components/form';
+import { greenButtonSx } from '../../components/buttonStyles';
 import { SaveButton } from '../../components/SaveButton';
-import { Field, Sheet } from '../../components/Sheet';
+import { CancelButton, Field, Sheet } from '../../components/Sheet';
 import { useSellLongHoldItem, useSellSingle } from '../../hooks/mutations';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import { formatMoney } from '../../lib/format';
@@ -17,16 +18,6 @@ export interface SellTarget {
   unitCost: number;
   unitValue: number | null;
 }
-
-const greenButtonSx = {
-  py: 1.5,
-  fontSize: 15,
-  backgroundColor: 'rgba(52,199,123,0.12)',
-  color: tokens.green,
-  border: '1px solid rgba(52,199,123,0.25)',
-  boxShadow: 'none',
-  '&:hover': { backgroundColor: 'rgba(52,199,123,0.2)', boxShadow: 'none' },
-};
 
 export function SellSheet({ target, onClose }: { target: SellTarget | null; onClose: () => void }) {
   const session = useSaveSession();
@@ -90,9 +81,7 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
       hint={problem}
       footer={
         <>
-          <Button variant="outlined" color="inherit" onClick={onClose} sx={{ py: 1.5, fontSize: 15 }}>
-            Cancel
-          </Button>
+          <CancelButton onClick={onClose} />
           <SaveButton
             disabled={!!problem}
             pending={sellSingle.isPending || sellLongHold.isPending}
@@ -124,15 +113,7 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
       </FieldRow>
       <FieldRow>
         <Field label="Profit (auto-calculated)">
-          <TextInput
-            type="number"
-            step="0.01"
-            placeholder="0.00"
-            autoComplete="off"
-            value={profit}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => setProfit(e.target.value)}
-          />
+          <ProfitInput value={profit} onChange={setProfit} />
         </Field>
       </FieldRow>
       {shown && (

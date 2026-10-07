@@ -1,9 +1,9 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { useState } from 'react';
 import type { SealedItem } from '../../api/types';
 import { Stepper } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
-import { Field, Sheet } from '../../components/Sheet';
+import { CancelButton, Field, Sheet } from '../../components/Sheet';
 import { useMoveSealed } from '../../hooks/mutations';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import { tokens } from '../../theme/tokens';
@@ -43,9 +43,7 @@ export function MoveSheet({ item, currentShortHoldName, onClose }: Props) {
       subtitle={shown && `${shown.name} — currently in ${shown.holdName}`}
       footer={
         <>
-          <Button variant="outlined" color="inherit" onClick={onClose} sx={{ py: 1.5, fontSize: 15 }}>
-            Cancel
-          </Button>
+          <CancelButton onClick={onClose} />
           <SaveButton
             pending={move.isPending}
             label="Move"

@@ -1,5 +1,6 @@
 import { Box } from '@mui/material';
 import type { InputHTMLAttributes, ReactNode } from 'react';
+import { flipSign } from '../lib/sellForm';
 import { fonts, tokens } from '../theme/tokens';
 
 const inputSx = {
@@ -33,6 +34,34 @@ export function MoneyInput(props: InputHTMLAttributes<HTMLInputElement>) {
       onFocus={(e) => e.target.select()}
       {...props}
     />
+  );
+}
+
+export function ProfitInput({ value, onChange }: { value: string; onChange: (text: string) => void }) {
+  return (
+    <Box sx={{ position: 'relative' }}>
+      <MoneyInput value={value} onChange={(e) => onChange(e.target.value)} style={{ paddingRight: 44 }} />
+      <Box
+        component="button"
+        type="button"
+        aria-label="make negative or positive"
+        onClick={() => onChange(flipSign(value))}
+        sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          height: '100%',
+          width: 40,
+          background: 'none',
+          border: 'none',
+          color: tokens.text2,
+          fontSize: 18,
+          cursor: 'pointer',
+        }}
+      >
+        ±
+      </Box>
+    </Box>
   );
 }
 

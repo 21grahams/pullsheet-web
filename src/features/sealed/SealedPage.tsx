@@ -6,7 +6,7 @@ import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
 import { useAppContext, useSealed } from '../../hooks/queries';
-import { cardNumbers, pasFeesLabel, quarterBoxes } from '../../lib/cardMath';
+import { cardNumbers, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary, type SealedGroup } from '../../lib/sealedGroups';
 import { fonts, tokens } from '../../theme/tokens';
@@ -15,15 +15,18 @@ import { MoveSheet } from '../items/MoveSheet';
 import { QuarterSheet, type QuarterTarget } from '../items/QuarterSheet';
 import { RemoveItemDialog } from '../items/RemoveItemDialog';
 import { SellSheet, type SellTarget } from '../items/SellSheet';
+import { CompleteHoldSheet, type CompleteTarget } from './CompleteHoldSheet';
 
 function GroupHeader({
   group,
   collapsed,
   onToggle,
+  onComplete,
 }: {
   group: SealedGroup;
   collapsed: boolean;
   onToggle: () => void;
+  onComplete: () => void;
 }) {
   return (
     <Box
@@ -62,9 +65,8 @@ function GroupHeader({
       </Box>
       <Box sx={{ flex: 1, height: '1px', backgroundColor: tokens.border }} />
       {group.status === 'current' && (
-        // Completing a Short Hold arrives in Phase 3.
         <Box onClick={(e) => e.stopPropagation()}>
-          <CardButton variant="green" disabled>
+          <CardButton variant="green" onClick={onComplete}>
             Complete ✓
           </CardButton>
         </Box>
@@ -144,6 +146,7 @@ export function SealedPage() {
   const [quarterTarget, setQuarterTarget] = useState<QuarterTarget | null>(null);
   const [selling, setSelling] = useState<SellTarget | null>(null);
   const [moving, setMoving] = useState<SealedItem | null>(null);
+  const [completing, setCompleting] = useState<CompleteTarget | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
 
@@ -180,6 +183,7 @@ export function SealedPage() {
         currentShortHoldName={context.data.currentShortHoldName}
         onClose={() => setMoving(null)}
       />
+      <CompleteHoldSheet target={completing} onClose={() => setCompleting(null)} />
       <RemoveItemDialog
         target={removing && { kind: 'sealed', item: removing }}
         onClose={() => setRemoving(null)}
@@ -236,7 +240,12 @@ export function SealedPage() {
         const isCollapsed = !!collapsed[group.holdId];
         return (
           <Box key={group.holdId} sx={{ mb: 0.5 }}>
-            <GroupHeader group={group} collapsed={isCollapsed} onToggle={() => toggleGroup(group.holdId)} />
+            <GroupHeader
+              group={group}
+              collapsed={isCollapsed}
+              onToggle={() => toggleGroup(group.holdId)}
+              onComplete={() => setCompleting({ holdName: group.name, spent: totals(group.items).totalCost })}
+            />
             {!isCollapsed && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {group.items.map((item) => (

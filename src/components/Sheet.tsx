@@ -1,4 +1,4 @@
-import { Box, Drawer } from '@mui/material';
+import { Box, Button, Drawer } from '@mui/material';
 import { useState, type ReactNode } from 'react';
 import { fonts, tokens } from '../theme/tokens';
 
@@ -69,7 +69,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: 'auto 1fr',
             gap: 1.25,
             mt: 2.5,
             pt: 2.5,
@@ -102,5 +102,13 @@ export function Field({ label, children }: { label: string; children: ReactNode 
       </Box>
       {children}
     </Box>
+  );
+}
+
+export function CancelButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button variant="outlined" color="inherit" onClick={onClick} sx={{ py: 1.5, px: 2.5, fontSize: 15 }}>
+      Cancel
+    </Button>
   );
 }

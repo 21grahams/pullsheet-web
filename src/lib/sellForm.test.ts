@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { autoProfit, partialSaleNote, validateSale } from './sellForm';
+import { autoProfit, flipSign, partialSaleNote, validateHoldSale, validateSale } from './sellForm';
 
 describe('autoProfit', () => {
   it('is sold price minus unit cost × quantity sold', () => {
@@ -40,5 +40,22 @@ describe('validateSale', () => {
   it('uses the (possibly edited) profit, defaulting to 0', () => {
     expect(validateSale('$1,350', '1300', 1, 1)).toEqual({ soldPrice: 1350, profit: 1300 });
     expect(validateSale('10', '', 1, 1)).toEqual({ soldPrice: 10, profit: 0 });
+  });
+});
+
+describe('validateHoldSale', () => {
+  it('needs a sold price above 0 (no trades) and a profit', () => {
+    expect(validateHoldSale('', '')).toEqual({ error: 'Enter a valid sold price' });
+    expect(validateHoldSale('0', '-10')).toEqual({ error: 'Enter a valid sold price' });
+    expect(validateHoldSale('500', '')).toEqual({ error: 'Enter profit amount' });
+    expect(validateHoldSale('$1,200', '-41.55')).toEqual({ soldPrice: 1200, profit: -41.55 });
+  });
+});
+
+describe('flipSign', () => {
+  it('toggles a leading minus', () => {
+    expect(flipSign('25.50')).toBe('-25.50');
+    expect(flipSign('-25.50')).toBe('25.50');
+    expect(flipSign('')).toBe('-');
   });
 });

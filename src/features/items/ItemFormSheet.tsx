@@ -1,8 +1,8 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { useState } from 'react';
 import { FieldRow, MoneyInput, Segmented, Stepper, TextInput } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
-import { Field, Sheet } from '../../components/Sheet';
+import { CancelButton, Field, Sheet } from '../../components/Sheet';
 import type { SealedItem, Single } from '../../api/types';
 import { useAddSealed, useAddSingle, useEditSealed, useEditSingle } from '../../hooks/mutations';
 import { useSaveSession } from '../../hooks/useSaveSession';
@@ -113,9 +113,7 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
       hint={problem}
       footer={
         <>
-          <Button variant="outlined" color="inherit" onClick={onClose} sx={{ py: 1.5, fontSize: 15 }}>
-            Cancel
-          </Button>
+          <CancelButton onClick={onClose} />
           <SaveButton
             disabled={!!problem}
             pending={pending}

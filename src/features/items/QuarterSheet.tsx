@@ -1,8 +1,7 @@
-import { Button } from '@mui/material';
 import { useState } from 'react';
 import { MoneyInput } from '../../components/form';
 import { SaveButton } from '../../components/SaveButton';
-import { Field, Sheet } from '../../components/Sheet';
+import { CancelButton, Field, Sheet } from '../../components/Sheet';
 import { useSetQuarterPrice } from '../../hooks/mutations';
 import { useSaveSession } from '../../hooks/useSaveSession';
 import { marketLabel } from '../../lib/itemForm';
@@ -50,9 +49,7 @@ export function QuarterSheet({ target, onClose }: { target: QuarterTarget | null
       hint={problem}
       footer={
         <>
-          <Button variant="outlined" color="inherit" onClick={onClose} sx={{ py: 1.5, fontSize: 15 }}>
-            Cancel
-          </Button>
+          <CancelButton onClick={onClose} />
           <SaveButton
             disabled={!!problem}
             pending={setQuarter.isPending}

@@ -1,0 +1,11 @@
+import { tokens } from '../theme/tokens';
+
+export const greenButtonSx = {
+  py: 1.5,
+  fontSize: 15,
+  backgroundColor: 'rgba(52,199,123,0.12)',
+  color: tokens.green,
+  border: '1px solid rgba(52,199,123,0.25)',
+  boxShadow: 'none',
+  '&:hover': { backgroundColor: 'rgba(52,199,123,0.2)', boxShadow: 'none' },
+};
