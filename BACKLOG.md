@@ -25,3 +25,9 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   when profit is far from sold − cost. Decide which before building.
 - **Rethink the Mark Sold layout.** The slim Qty stepper beside Total Sold Price works but feels
   cramped; brainstorm a better use of the space (e.g. qty inline in the subtitle, swipe/tap qty).
+- **Per-field validation messages.** Forms already block bad saves with one hint above the
+  buttons; show what's wrong next to each field instead (agree on the look first).
+- **Rename the app** (before any App Store/Swift release). Name idea: "Pulled". Includes the
+  custom domain, GitHub repo names, and tidying the Mac folders at the same time (`~/Pullsheet`
+  vs `~/pullsheet-web`): moving the backend folder means updating the nightly backup job's paths,
+  the practice setup, and Claude's per-project notes together.
