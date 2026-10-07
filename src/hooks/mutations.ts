@@ -23,7 +23,12 @@ function useSave<TVars, TResult>(
       notify(successMessage(result, vars), 'success');
       await Promise.all(refresh.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
     },
-    onError: (error) => notify(`Failed — ${error.message}`, 'error'),
+    // The item may have changed elsewhere (sold or removed on another device),
+    // so refresh to show what's actually there now.
+    onError: async (error) => {
+      notify(`Failed — ${error.message}`, 'error');
+      await Promise.all(refresh.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+    },
   });
 }
 

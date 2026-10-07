@@ -18,6 +18,27 @@ export class ApiError extends Error {
   override name = 'ApiError';
 }
 
+type Response<T> = { data: T | null; error: { message: string } | null };
+
+const TIMEOUT_MS = 15_000;
+
+/** Gives up on a request that hangs (weak signal) instead of spinning forever. */
+async function send<T>(
+  request: PromiseLike<Response<T>> & { abortSignal(signal: AbortSignal): PromiseLike<Response<T>> },
+): Promise<Response<T>> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const result = await request.abortSignal(controller.signal);
+    if (controller.signal.aborted) {
+      return { data: null, error: { message: 'Request timed out — check your connection and try again' } };
+    }
+    return result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
   if (error) throw new ApiError(error.message);
   if (data == null) throw new ApiError('No data returned');
@@ -29,7 +50,7 @@ const n = (v: unknown): number | null => (v == null ? null : Number(v));
 const num = (v: unknown): number => Number(v ?? 0);
 
 export async function getContext(): Promise<AppContext> {
-  const [row] = unwrap(await supabase.rpc('api_get_context'));
+  const [row] = unwrap(await send(supabase.rpc('api_get_context')));
   if (!row) throw new ApiError('No context returned');
   return {
     today: row.today,
@@ -41,7 +62,7 @@ export async function getContext(): Promise<AppContext> {
 }
 
 export async function listSingles(): Promise<Single[]> {
-  const rows = unwrap(await supabase.rpc('api_list_singles'));
+  const rows = unwrap(await send(supabase.rpc('api_list_singles')));
   return rows.map((r) => ({
     id: r.id,
     pokemon: r.pokemon,
@@ -60,7 +81,7 @@ export async function listSingles(): Promise<Single[]> {
 }
 
 export async function listSealed(): Promise<SealedItem[]> {
-  const rows = unwrap(await supabase.rpc('api_list_sealed'));
+  const rows = unwrap(await send(supabase.rpc('api_list_sealed')));
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
@@ -79,7 +100,7 @@ export async function listSealed(): Promise<SealedItem[]> {
 }
 
 export async function listAccounts(): Promise<RetailerAccount[]> {
-  const rows = unwrap(await supabase.rpc('api_list_accounts'));
+  const rows = unwrap(await send(supabase.rpc('api_list_accounts')));
   return rows.map((r) => ({
     id: r.id,
     retailer: r.retailer,
@@ -93,7 +114,7 @@ export async function listAccounts(): Promise<RetailerAccount[]> {
 }
 
 export async function listCompletedHolds(): Promise<CompletedHold[]> {
-  const rows = unwrap(await supabase.rpc('api_list_completed_holds'));
+  const rows = unwrap(await send(supabase.rpc('api_list_completed_holds')));
   return rows.map((r) => ({
     id: r.id,
     number: r.number,
@@ -108,7 +129,7 @@ export async function listCompletedHolds(): Promise<CompletedHold[]> {
 }
 
 export async function getSummary(): Promise<Summary> {
-  const [r] = unwrap(await supabase.rpc('api_get_summary'));
+  const [r] = unwrap(await send(supabase.rpc('api_get_summary')));
   if (!r) throw new ApiError('No summary returned');
   return {
     singles: {
@@ -160,11 +181,9 @@ export async function getSummary(): Promise<Summary> {
   };
 }
 
-async function save<T>(
-  call: PromiseLike<{ data: T | null; error: { message: string } | null }>,
-): Promise<T | null> {
+async function save<T>(call: Parameters<typeof send<T>>[0]): Promise<T | null> {
   if (!navigator.onLine) throw new ApiError("You're offline — changes can't be saved until you reconnect.");
-  const { data, error } = await call;
+  const { data, error } = await send(call);
   if (error) throw new ApiError(error.message);
   return data;
 }

@@ -83,6 +83,7 @@ function PeriodBox({
 }: {
   title: string;
   sales: Omit<SalesBox, 'hasSales'>;
+  /** The Singles / Long Hold sales boxes: green border, and every row always shown. */
   highlight?: boolean;
 }) {
   const row = (label: string, value: string, color: string = tokens.text) => (
@@ -113,11 +114,11 @@ function PeriodBox({
       >
         {title}
       </Box>
-      {/* As in the old app, zero sold price / markup / margin rows are left out. */}
-      {sales.soldPrice !== 0 && row('Sold Price', formatMoney(sales.soldPrice))}
+      {/* As in the old app, Short Hold boxes leave out zero sold price / markup / margin rows. */}
+      {(highlight || sales.soldPrice !== 0) && row('Sold Price', formatMoney(sales.soldPrice))}
       {row('Profit', formatMoney(sales.profit), signColor(sales.profit))}
-      {sales.markup !== 0 && row('Markup', formatRatioPct(sales.markup))}
-      {sales.margin !== 0 && row('Margin', formatRatioPct(sales.margin))}
+      {(highlight || sales.markup !== 0) && row('Markup', formatRatioPct(sales.markup))}
+      {(highlight || sales.margin !== 0) && row('Margin', formatRatioPct(sales.margin))}
     </Box>
   );
 }

@@ -93,7 +93,7 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
         </>
       }
     >
-      <FieldRow>
+      <FieldRow columns="112px 1fr">
         <Field label="Qty Sold">
           <Stepper
             value={quantity}
@@ -104,18 +104,12 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
           />
         </Field>
         <Field label="Total Sold Price">
-          <MoneyInput
-            placeholder="0.00 (or 0 for a trade)"
-            value={soldPrice}
-            onChange={(e) => changePrice(e.target.value)}
-          />
+          <MoneyInput value={soldPrice} onChange={(e) => changePrice(e.target.value)} />
         </Field>
       </FieldRow>
-      <FieldRow>
-        <Field label="Profit (auto-calculated)">
-          <ProfitInput value={profit} onChange={setProfit} />
-        </Field>
-      </FieldRow>
+      <Field label="Profit (auto-calculated)">
+        <ProfitInput value={profit} onChange={setProfit} />
+      </Field>
       {shown && (
         <Box sx={{ fontSize: 11, color: tokens.text3 }}>
           {partialSaleNote(shown.quantity, quantity, listName)}

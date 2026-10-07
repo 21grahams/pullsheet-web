@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, listSingles } from './index';
+import { ApiError, deleteSingle, listSingles } from './index';
 
 const rpc = vi.fn();
-vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => rpc(...args) } }));
+// Like the real query builder: awaited through abortSignal().
+vi.mock('../lib/supabase', () => ({
+  supabase: {
+    rpc: (...args: unknown[]) => ({ abortSignal: (signal: AbortSignal) => rpc(...args, signal) }),
+  },
+}));
 
-beforeEach(() => rpc.mockReset());
+beforeEach(() => {
+  rpc.mockReset();
+});
 
 describe('api', () => {
   it('maps rows to app types, keeping missing prices as null', async () => {
@@ -32,7 +39,7 @@ describe('api', () => {
       ],
     });
     const [single] = await listSingles();
-    expect(rpc).toHaveBeenCalledWith('api_list_singles');
+    expect(rpc).toHaveBeenCalledWith('api_list_singles', expect.any(AbortSignal));
     expect(single).toMatchObject({ setName: 'Southern Islands', totalCost: 88.39, unitValue: 88.02 });
     expect(single!.quarterUnitValues).toEqual([70.82, 80.07, 88.02, null]);
   });
@@ -44,5 +51,19 @@ describe('api', () => {
     });
     await expect(listSingles()).rejects.toThrow(ApiError);
     await expect(listSingles()).rejects.toThrow('permission denied');
+  });
+
+  it('gives up on a save that hangs, with a friendly message', async () => {
+    vi.useFakeTimers();
+    rpc.mockImplementation((...args: unknown[]) => {
+      const signal = args.at(-1) as AbortSignal;
+      return new Promise((resolve) =>
+        signal.addEventListener('abort', () => resolve({ data: null, error: { message: 'AbortError' } })),
+      );
+    });
+    const saving = expect(deleteSingle('req-1', 1)).rejects.toThrow('Request timed out');
+    await vi.advanceTimersByTimeAsync(15_000);
+    await saving;
+    vi.useRealTimers();
   });
 });

@@ -22,3 +22,5 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   typo like 100,000 skews Summary until fixed in the database. Options: keep sold price and
   profit linked both ways (editing profit updates sold price = cost + profit), or a soft warning
   when profit is far from sold − cost. Decide which before building.
+- **Rethink the Mark Sold layout.** The slim Qty stepper beside Total Sold Price works but feels
+  cramped; brainstorm a better use of the space (e.g. qty inline in the subtitle, swipe/tap qty).
