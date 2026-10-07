@@ -60,12 +60,6 @@ Rules:
 
 ## Status
 
-- Phase 4 polish note: after a sheet closes on iPhone, the page briefly shows iOS's keyboard
-  offset before scroll is restored (restore currently waits for the slide-down). Try restoring
-  earlier.
-
-- Phase 0 (backend auth/RLS/API): done.
-- Phase 1 (scaffold, theme, login, shell, PWA, CI): done 2026-10-06.
-- Next: Phase 2, read-only screens (Singles with search/filters, Sealed groups, Summary,
-  Retailer Accounts). Then 3 mutations, 4 polish/parity, 5 cutover.
+- Phases 0–3 done (backend API, scaffold, read-only screens, all saving) by 2026-10-06.
+- Phase 4 (polish/parity) in progress. Then 5 cutover.
 - The app will be renamed later. Keep new identifiers name-neutral where cheap.
