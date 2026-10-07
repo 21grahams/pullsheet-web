@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Box, Button, Drawer } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { fonts, tokens } from '../theme/tokens';
 
@@ -13,6 +13,46 @@ interface SheetProps {
   children: ReactNode;
   footer?: ReactNode;
   hint?: string | null;
+}
+
+const CLOSE_FRACTION = 1 / 3; // dragged this far down the sheet's height closes it
+const FLICK_SPEED = 0.5; // px per ms; a quick flick closes it even if short
+
+function useDragToClose(onClose: () => void) {
+  const drag = useRef<{ paper: HTMLElement; startY: number; startTime: number; dy: number } | null>(null);
+
+  const end = () => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d) return;
+    const speed = d.dy / Math.max(1, performance.now() - d.startTime);
+    d.paper.style.transition = 'transform 0.2s ease-out';
+    if (d.dy > d.paper.offsetHeight * CLOSE_FRACTION || (speed > FLICK_SPEED && d.dy > 30)) {
+      onClose();
+    } else {
+      d.paper.style.transform = 'none';
+    }
+  };
+
+  return {
+    onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+      const paper = e.currentTarget.closest<HTMLElement>('.MuiDrawer-paper');
+      if (!paper) return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      paper.style.transition = 'none';
+      drag.current = { paper, startY: e.clientY, startTime: performance.now(), dy: 0 };
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+      const d = drag.current;
+      if (!d) return;
+      d.dy = Math.max(0, e.clientY - d.startY);
+      // MUI's slide-out keeps a `translate(x, y)` drag position instead of resetting it
+      // (which flashes the sheet back to the top in Chrome).
+      d.paper.style.transform = `translate(0px, ${d.dy}px)`;
+    },
+    onPointerUp: end,
+    onPointerCancel: end,
+  };
 }
 
 export function Sheet({ open, onClose, title, subtitle, children, footer, hint }: SheetProps) {
@@ -27,6 +67,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
     else setCloseCount((n) => n + 1);
   }
   const restoreScroll = () => window.scrollTo(0, savedScroll);
+  const dragHandlers = useDragToClose(onClose);
 
   // Restoring only after the slide-down shows the shifted page for a moment, so
   // also restore as closing starts, while the backdrop still covers it.
@@ -57,19 +98,20 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
             border: 'none',
             backgroundColor: tokens.surface,
             px: 2.5,
-            pt: 3,
             pb: 'calc(24px + env(safe-area-inset-bottom))',
           },
         },
       }}
     >
-      <Box
-        sx={{ width: 36, height: 4, borderRadius: 2, backgroundColor: tokens.border, mx: 'auto', mb: 2.5 }}
-      />
-      <Box sx={{ fontFamily: fonts.serif, fontSize: 20, color: tokens.gold, mb: subtitle ? 0.5 : 2.5 }}>
-        {title}
+      <Box {...dragHandlers} sx={{ mx: -2.5, px: 2.5, pt: 3, touchAction: 'none', cursor: 'grab' }}>
+        <Box
+          sx={{ width: 36, height: 4, borderRadius: 2, backgroundColor: tokens.border, mx: 'auto', mb: 2.5 }}
+        />
+        <Box sx={{ fontFamily: fonts.serif, fontSize: 20, color: tokens.gold, mb: subtitle ? 0.5 : 2.5 }}>
+          {title}
+        </Box>
+        {subtitle && <Box sx={{ fontSize: 13, color: tokens.text2, mb: 2.5 }}>{subtitle}</Box>}
       </Box>
-      {subtitle && <Box sx={{ fontSize: 13, color: tokens.text2, mb: 2.5 }}>{subtitle}</Box>}
       {children}
       {hint && <Box sx={{ fontSize: 12, color: tokens.text3, textAlign: 'center', mt: 2 }}>{hint}</Box>}
       {footer && (

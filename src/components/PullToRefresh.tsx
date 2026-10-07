@@ -29,6 +29,8 @@ export function PullToRefresh({ top }: { top: number }) {
     };
 
     const onStart = (e: TouchEvent) => {
+      // Swipes inside an open sheet or dialog belong to it.
+      if (e.target instanceof Element && e.target.closest('.MuiModal-root')) return;
       if (window.scrollY === 0 && stateRef.current !== 'refreshing') startY.current = e.touches[0]!.clientY;
     };
     const onMove = (e: TouchEvent) => {
