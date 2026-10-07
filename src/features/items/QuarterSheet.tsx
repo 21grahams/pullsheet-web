@@ -22,10 +22,13 @@ export function QuarterSheet({ target, onClose }: { target: QuarterTarget | null
   const setQuarter = useSetQuarterPrice();
   const [shown, setShown] = useState<QuarterTarget | null>(target);
   const [value, setValue] = useState('');
+  const [initialText, setInitialText] = useState('');
 
   if (target && target !== shown) {
     setShown(target);
-    setValue(target.unitValue ? toInputText(target.unitValue) : '');
+    const start = target.unitValue ? toInputText(target.unitValue) : '';
+    setValue(start);
+    setInitialText(start);
     session.reset();
   }
 
@@ -33,9 +36,11 @@ export function QuarterSheet({ target, onClose }: { target: QuarterTarget | null
   const problem =
     !Number.isFinite(unitValue) || unitValue < 0 ? 'Enter a value (0 clears the quarter)' : null;
 
+  const unchanged = initialText !== '' && value.trim() === initialText;
+
   function submit() {
     if (!target) return;
-    if (problem) return;
+    if (problem || unchanged) return;
     const vars = { item: target.item, quarter: target.quarter, unitValue };
     setQuarter.mutate({ requestId: session.idFor(vars), ...vars }, { onSuccess: onClose });
   }
@@ -51,7 +56,7 @@ export function QuarterSheet({ target, onClose }: { target: QuarterTarget | null
         <>
           <CancelButton onClick={onClose} />
           <SaveButton
-            disabled={!!problem}
+            disabled={!!problem || unchanged}
             pending={setQuarter.isPending}
             label="Save"
             onClick={submit}

@@ -30,12 +30,15 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
   const edit = useEditAccount();
   const listId = useId();
   const [form, setForm] = useState<AccountFormValues>(emptyAccountForm);
+  const [initial, setInitial] = useState<AccountFormValues | null>(null);
   const [wasOpen, setWasOpen] = useState(open);
 
   if (open !== wasOpen) {
     setWasOpen(open);
     if (open) {
-      setForm(editing ? formFromAccount(editing) : emptyAccountForm());
+      const start = editing ? formFromAccount(editing) : emptyAccountForm();
+      setForm(start);
+      setInitial(editing ? start : null);
       session.reset();
     }
   }
@@ -49,9 +52,10 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
   });
 
   const problem = validateAccountForm(form);
+  const unchanged = initial != null && JSON.stringify(form) === JSON.stringify(initial);
 
   function submit() {
-    if (problem) return;
+    if (problem || unchanged) return;
     const input = toAccountInput(form);
     const done = { onSuccess: onClose };
     if (editing) edit.mutate({ requestId: session.idFor(input), id: editing.id, input }, done);
@@ -71,7 +75,7 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
         <>
           <CancelButton onClick={onClose} />
           <SaveButton
-            disabled={!!problem}
+            disabled={!!problem || unchanged}
             pending={add.isPending || edit.isPending}
             label={isEdit ? 'Save Changes' : 'Add Account'}
             pendingLabel={isEdit ? 'Saving…' : 'Adding…'}

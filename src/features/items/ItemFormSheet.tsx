@@ -84,9 +84,10 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
   const pending = addSingle.isPending || addSealed.isPending || editSingle.isPending || editSealed.isPending;
 
   const problem = validateItemForm(kind, form);
+  const unchanged = original != null && JSON.stringify(form) === JSON.stringify(original.values);
 
   function submit() {
-    if (problem) return;
+    if (problem || unchanged) return;
     const done = { onSuccess: onClose };
     const prefill = original ?? undefined;
     if (kind === 'single') {
@@ -115,7 +116,7 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
         <>
           <CancelButton onClick={onClose} />
           <SaveButton
-            disabled={!!problem}
+            disabled={!!problem || unchanged}
             pending={pending}
             label={isEdit ? 'Save Changes' : 'Add to Collection'}
             pendingLabel={isEdit ? 'Saving…' : 'Adding…'}

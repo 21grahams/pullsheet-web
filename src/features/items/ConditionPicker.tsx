@@ -27,6 +27,7 @@ export function ConditionPicker({ value, onChange }: { value: string; onChange: 
   const [kind, setKind] = useState<'raw' | 'graded'>(initial?.kind ?? 'raw');
   const [grader, setGrader] = useState<Grader | ''>(initial?.kind === 'graded' ? initial.grader : '');
   const [grade, setGrade] = useState(initial?.kind === 'graded' ? initial.grade : '');
+  const [rawChoice, setRawChoice] = useState(initial?.kind === 'raw' ? initial.code : '');
 
   const emitGraded = (g: Grader | '', n: string) => onChange(g && n ? `${g} ${n}` : '');
 
@@ -36,9 +37,9 @@ export function ConditionPicker({ value, onChange }: { value: string; onChange: 
         value={kind}
         onChange={(k) => {
           setKind(k);
-          setGrader('');
-          setGrade('');
-          onChange('');
+          // Each side keeps its last choice, so switching back restores it.
+          if (k === 'raw') onChange(rawChoice);
+          else emitGraded(grader, grade);
         }}
         options={[
           { value: 'raw', label: 'Raw' },
@@ -57,7 +58,10 @@ export function ConditionPicker({ value, onChange }: { value: string; onChange: 
                   component="button"
                   type="button"
                   aria-pressed={selected}
-                  onClick={() => onChange(code)}
+                  onClick={() => {
+                    setRawChoice(code);
+                    onChange(code);
+                  }}
                   sx={{
                     py: 1.25,
                     borderRadius: '8px',
