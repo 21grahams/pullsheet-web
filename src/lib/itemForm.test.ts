@@ -12,42 +12,44 @@ import {
 const base = emptyItemForm('2026-10-06');
 
 describe('validateItemForm', () => {
-  it('needs a Pokémon for singles and a name for sealed', () => {
-    expect(validateItemForm('single', { ...base, market: '10' })).toBe('Enter a Pokémon');
-    expect(validateItemForm('sealed', { ...base, market: '10' })).toBe('Enter a name');
-  });
-  it('needs a set and condition for singles', () => {
-    expect(validateItemForm('single', { ...base, pokemon: 'Mew', market: '10' })).toBe('Enter a set');
-    expect(validateItemForm('single', { ...base, pokemon: 'Mew', setName: '151', market: '10' })).toBe(
-      'Enter a condition',
-    );
+  it('reports every missing field at once', () => {
+    expect(validateItemForm('single', base)).toEqual({
+      pokemon: 'Enter a Pokémon',
+      setName: 'Enter a set',
+      condition: 'Choose a condition',
+      market: 'Enter a market value',
+    });
+    expect(validateItemForm('sealed', base)).toEqual({
+      name: 'Enter a name',
+      market: 'Enter a market value',
+    });
   });
   it('rejects conditions outside the allowed list', () => {
-    expect(
-      validateItemForm('single', {
-        ...base,
-        pokemon: 'Mew',
-        setName: '151',
-        condition: 'this is a condition test',
-        market: '10',
-      }),
-    ).toBe('Choose a valid condition');
+    const v = {
+      ...base,
+      pokemon: 'Mew',
+      setName: '151',
+      condition: 'this is a condition test',
+      market: '10',
+    };
+    expect(validateItemForm('single', v)).toEqual({ condition: 'Choose a condition' });
   });
-  it('needs a market value', () => {
-    expect(validateItemForm('sealed', { ...base, name: 'ETB' })).toBe('Enter a market value per item');
-    expect(validateItemForm('sealed', { ...base, name: 'ETB', market: 'abc' })).toBe(
-      'Enter a market value per item',
-    );
+  it('rejects a market value that is not a number', () => {
+    expect(validateItemForm('sealed', { ...base, name: 'ETB', market: 'abc' })).toEqual({
+      market: 'Enter a market value',
+    });
   });
   it("won't let units with fee exceed quantity", () => {
-    expect(validateItemForm('sealed', { ...base, name: 'ETB', market: '10', quantity: 2, feeUnits: 3 })).toBe(
-      "Units w/ Fee can't exceed total quantity",
-    );
+    expect(
+      validateItemForm('sealed', { ...base, name: 'ETB', market: '10', quantity: 2, feeUnits: 3 }),
+    ).toEqual({
+      feeUnits: "Units w/ fee can't exceed qty",
+    });
   });
   it('accepts a complete form (cost may be blank, like the old app)', () => {
     expect(
       validateItemForm('single', { ...base, pokemon: 'Mew', setName: '151', condition: 'NM', market: '10' }),
-    ).toBeNull();
+    ).toEqual({});
   });
 });
 

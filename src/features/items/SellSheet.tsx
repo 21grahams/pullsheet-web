@@ -26,11 +26,13 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
   const [shown, setShown] = useState<SellTarget | null>(target);
   const [quantity, setQuantity] = useState(1);
   const [soldPrice, setSoldPrice] = useState('');
+  const [attempted, setAttempted] = useState(false);
 
   if (target && target !== shown) {
     setShown(target);
     setQuantity(target.quantity);
     setSoldPrice('');
+    setAttempted(false);
     session.reset();
   }
 
@@ -38,13 +40,17 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
 
   const profit = profitFor(soldPrice, (shown?.unitCost ?? 0) * quantity);
   const validation = validateSale(soldPrice, quantity, shown?.quantity ?? 0, shown?.unitCost ?? 0);
-  const problem = 'error' in validation ? validation.error : null;
+  const errors = 'errors' in validation ? validation.errors : {};
+  const shownErrors = attempted ? errors : {};
 
   function submit() {
     if (!target) return;
-    if ('error' in validation) return;
-    const result = validation;
-    const vars = { id: target.id, quantity, ...result };
+    if ('errors' in validation) {
+      setAttempted(true);
+
+      return;
+    }
+    const vars = { id: target.id, quantity, ...validation };
     const mutation = target.kind === 'single' ? sellSingle : sellLongHold;
     mutation.mutate({ requestId: session.idFor(vars), ...vars }, { onSuccess: onClose });
   }
@@ -65,12 +71,11 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
           </>
         )
       }
-      hint={problem}
       footer={
         <>
           <CancelButton onClick={onClose} />
           <SaveButton
-            disabled={!!problem}
+            invalid={'errors' in validation}
             pending={sellSingle.isPending || sellLongHold.isPending}
             label="Mark Sold"
             pendingLabel="Marking Sold…"
@@ -81,7 +86,7 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
       }
     >
       <FieldRow columns="72px 1fr 1fr">
-        <Field label="Qty">
+        <Field label="Qty" error={shownErrors.quantity}>
           <Select
             aria-label="quantity sold"
             value={quantity}
@@ -95,7 +100,7 @@ export function SellSheet({ target, onClose }: { target: SellTarget | null; onCl
             ))}
           </Select>
         </Field>
-        <Field label="Sold Price">
+        <Field label="Sold Price" error={shownErrors.soldPrice}>
           <MoneyInput value={soldPrice} onChange={(e) => setSoldPrice(e.target.value)} />
         </Field>
         <Field label="Profit">

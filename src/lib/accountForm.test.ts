@@ -26,9 +26,11 @@ describe('formFromAccount', () => {
 
 describe('validateAccountForm', () => {
   it('needs a retailer and a label', () => {
-    expect(validateAccountForm(emptyAccountForm())).toBe('Enter a retailer');
-    expect(validateAccountForm({ ...emptyAccountForm(), retailer: 'Target' })).toBe('Enter an account label');
-    expect(validateAccountForm({ ...emptyAccountForm(), retailer: 'Target', label: 'Main' })).toBeNull();
+    expect(validateAccountForm(emptyAccountForm())).toEqual({
+      retailer: 'Enter a retailer',
+      label: 'Enter an account label',
+    });
+    expect(validateAccountForm({ ...emptyAccountForm(), retailer: 'Target', label: 'Main' })).toEqual({});
   });
 });
 

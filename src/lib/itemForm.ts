@@ -46,19 +46,23 @@ function parseMoney(text: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-export function validateItemForm(kind: ItemKind, v: ItemFormValues): string | null {
-  if (kind === 'single') {
-    if (!v.pokemon.trim()) return 'Enter a Pokémon';
-    if (!v.setName.trim()) return 'Enter a set';
-    if (!v.condition.trim()) return 'Enter a condition';
-    if (!isValidCondition(v.condition)) return 'Choose a valid condition';
-  } else if (!v.name.trim()) {
-    return 'Enter a name';
-  }
-  if (!parseMoney(v.market)) return 'Enter a market value per item';
-  if (v.feeUnits > v.quantity) return "Units w/ Fee can't exceed total quantity";
+export type ItemFormErrors = Partial<
+  Record<'pokemon' | 'setName' | 'condition' | 'name' | 'market' | 'feeUnits', string>
+>;
 
-  return null;
+export function validateItemForm(kind: ItemKind, v: ItemFormValues): ItemFormErrors {
+  const errors: ItemFormErrors = {};
+  if (kind === 'single') {
+    if (!v.pokemon.trim()) errors.pokemon = 'Enter a Pokémon';
+    if (!v.setName.trim()) errors.setName = 'Enter a set';
+    if (!isValidCondition(v.condition)) errors.condition = 'Choose a condition';
+  } else if (!v.name.trim()) {
+    errors.name = 'Enter a name';
+  }
+  if (!parseMoney(v.market)) errors.market = 'Enter a market value';
+  if (v.feeUnits > v.quantity) errors.feeUnits = "Units w/ fee can't exceed qty";
+
+  return errors;
 }
 
 export interface ItemFormOriginal {

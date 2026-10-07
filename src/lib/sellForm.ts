@@ -17,7 +17,8 @@ export function partialSaleNote(owned: number, selling: number, listName: string
   return `${left} unit${left !== 1 ? 's' : ''} will remain in ${listName}.`;
 }
 
-export type SaleValidation = { error: string } | { soldPrice: number; profit: number };
+export type SaleErrors = Partial<Record<'quantity' | 'soldPrice', string>>;
+export type SaleValidation = { errors: SaleErrors } | { soldPrice: number; profit: number };
 
 export function validateSale(
   soldPrice: string,
@@ -25,19 +26,21 @@ export function validateSale(
   owned: number,
   unitCost: number,
 ): SaleValidation {
+  const errors: SaleErrors = {};
   const price = parse(soldPrice);
   if (soldPrice.trim() === '' || !Number.isFinite(price) || price < 0) {
-    return { error: 'Enter a sold price (0 or more, e.g. for trades)' };
+    errors.soldPrice = 'Enter a price (0 for a trade)';
   }
-  if (quantitySold < 1) return { error: 'Enter qty sold' };
-  if (quantitySold > owned) return { error: `You only have ${owned}` };
+  if (quantitySold < 1) errors.quantity = 'Enter qty sold';
+  else if (quantitySold > owned) errors.quantity = `You only have ${owned}`;
+  if (Object.keys(errors).length) return { errors };
 
   return { soldPrice: price, profit: cents(price - unitCost * quantitySold) };
 }
 
 export function validateHoldSale(soldPrice: string, spent: number): SaleValidation {
   const price = parse(soldPrice);
-  if (!Number.isFinite(price) || price <= 0) return { error: 'Enter a valid sold price' };
+  if (!Number.isFinite(price) || price <= 0) return { errors: { soldPrice: 'Enter a sold price' } };
 
   return { soldPrice: price, profit: cents(price - spent) };
 }

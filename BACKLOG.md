@@ -14,8 +14,6 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   purchase date wins; the absorbed row is soft-deleted so sales history still links. Edit blocks
   a rename that would create a duplicate ("Already in this hold — use Add to increase qty").
   Change lives in the database functions; check production for existing duplicates first.
-- **Per-field validation messages.** Forms already block bad saves with one hint above the
-  buttons; show what's wrong next to each field instead (agree on the look first).
 - **Rename the app** (before any App Store/Swift release). Name idea: "Pulled". Includes the
   custom domain, GitHub repo names, and tidying the Mac folders at the same time (`~/Pullsheet`
   vs `~/pullsheet-web`): moving the backend folder means updating the nightly backup job's paths,

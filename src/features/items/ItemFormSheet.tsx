@@ -59,6 +59,7 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
   const [original, setOriginal] = useState<ItemFormOriginal | null>(null);
   const [showTag, setShowTag] = useState(false);
   const [wasOpen, setWasOpen] = useState(open);
+  const [attempted, setAttempted] = useState(false);
   const [openCount, setOpenCount] = useState(0);
 
   if (open !== wasOpen) {
@@ -69,6 +70,7 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
       setForm(prefill?.values ?? emptyItemForm(today));
       setShowTag(!!prefill?.values.extra);
       setOpenCount((n) => n + 1);
+      setAttempted(false);
       session.reset();
     }
   }
@@ -83,11 +85,18 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
 
   const pending = addSingle.isPending || addSealed.isPending || editSingle.isPending || editSealed.isPending;
 
-  const problem = validateItemForm(kind, form);
+  const errors = validateItemForm(kind, form);
+  const invalid = Object.keys(errors).length > 0;
+  const shown = attempted ? errors : {};
   const unchanged = original != null && JSON.stringify(form) === JSON.stringify(original.values);
 
   function submit() {
-    if (problem || unchanged) return;
+    if (invalid) {
+      setAttempted(true);
+
+      return;
+    }
+    if (unchanged) return;
     const done = { onSuccess: onClose };
     const prefill = original ?? undefined;
     if (kind === 'single') {
@@ -111,12 +120,11 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
       open={open}
       onClose={onClose}
       title={`${isEdit ? 'Edit' : 'Add'} ${kind === 'single' ? 'Single Card' : 'Sealed Product'}`}
-      hint={problem}
       footer={
         <>
           <CancelButton onClick={onClose} />
           <SaveButton
-            disabled={!!problem || unchanged}
+            invalid={invalid || unchanged}
             pending={pending}
             label={isEdit ? 'Save Changes' : 'Add to Collection'}
             pendingLabel={isEdit ? 'Saving…' : 'Adding…'}
@@ -141,11 +149,11 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
 
       <FieldRow columns="1fr 112px">
         {kind === 'single' ? (
-          <Field label="Pokémon">
+          <Field label="Pokémon" error={shown.pokemon}>
             <TextInput placeholder="e.g. Charizard ex" autoCapitalize="words" {...text('pokemon')} />
           </Field>
         ) : (
-          <Field label="Product Name">
+          <Field label="Product Name" error={shown.name}>
             <TextInput placeholder="e.g. Prismatic Evolutions ETB" {...text('name')} />
           </Field>
         )}
@@ -156,10 +164,10 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
 
       {kind === 'single' && (
         <>
-          <Field label="Set">
+          <Field label="Set" error={shown.setName}>
             <TextInput placeholder="e.g. Obsidian Flames" {...text('setName')} />
           </Field>
-          <Field label="Condition">
+          <Field label="Condition" error={shown.condition}>
             <ConditionPicker key={openCount} value={form.condition} onChange={(c) => set('condition', c)} />
           </Field>
         </>
@@ -169,7 +177,7 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
         <Field label="Purchase Date">
           <TextInput type="date" {...text('purchaseDate')} />
         </Field>
-        <Field label={marketLabel(form.quantity)}>
+        <Field label={marketLabel(form.quantity)} error={shown.market}>
           <MoneyInput {...text('market')} />
         </Field>
       </FieldRow>
@@ -178,7 +186,7 @@ export function ItemFormSheet({ kind, open, onClose, today, editing }: Props) {
         <Field label="Total Cost Paid">
           <MoneyInput {...text('cost')} />
         </Field>
-        <Field label="PAS Fees (Optional)">
+        <Field label="PAS Fees (Optional)" error={shown.feeUnits}>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <MoneyInput {...text('fees')} style={{ flex: 1, minWidth: 0 }} />
             <Box sx={{ width: 104, flexShrink: 0 }}>

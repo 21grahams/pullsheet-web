@@ -102,6 +102,7 @@ export function Stepper({
 }) {
   return (
     <Box
+      data-field-box
       sx={{
         display: 'flex',
         alignItems: 'center',

@@ -32,6 +32,7 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
   const [form, setForm] = useState<AccountFormValues>(emptyAccountForm);
   const [initial, setInitial] = useState<AccountFormValues | null>(null);
   const [wasOpen, setWasOpen] = useState(open);
+  const [attempted, setAttempted] = useState(false);
 
   if (open !== wasOpen) {
     setWasOpen(open);
@@ -39,6 +40,7 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
       const start = editing ? formFromAccount(editing) : emptyAccountForm();
       setForm(start);
       setInitial(editing ? start : null);
+      setAttempted(false);
       session.reset();
     }
   }
@@ -51,11 +53,18 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
     onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => e.target.select(),
   });
 
-  const problem = validateAccountForm(form);
+  const errors = validateAccountForm(form);
+  const invalid = Object.keys(errors).length > 0;
+  const shown = attempted ? errors : {};
   const unchanged = initial != null && JSON.stringify(form) === JSON.stringify(initial);
 
   function submit() {
-    if (problem || unchanged) return;
+    if (invalid) {
+      setAttempted(true);
+
+      return;
+    }
+    if (unchanged) return;
     const input = toAccountInput(form);
     const done = { onSuccess: onClose };
     if (editing) edit.mutate({ requestId: session.idFor(input), id: editing.id, input }, done);
@@ -70,12 +79,11 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
       open={open}
       onClose={onClose}
       title={isEdit ? 'Edit Account' : 'Add Account'}
-      hint={problem}
       footer={
         <>
           <CancelButton onClick={onClose} />
           <SaveButton
-            disabled={!!problem || unchanged}
+            invalid={invalid || unchanged}
             pending={add.isPending || edit.isPending}
             label={isEdit ? 'Save Changes' : 'Add Account'}
             pendingLabel={isEdit ? 'Saving…' : 'Adding…'}
@@ -85,7 +93,7 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
         </>
       }
     >
-      <Field label="Retailer">
+      <Field label="Retailer" error={shown.retailer}>
         <TextInput placeholder="e.g. Walmart" list={listId} disabled={isEdit} {...text('retailer')} />
         <datalist id={listId}>
           {retailers.map((r) => (
@@ -98,7 +106,7 @@ export function AccountSheet({ open, editing, retailers, onClose }: Props) {
           </Box>
         )}
       </Field>
-      <Field label="Account Label">
+      <Field label="Account Label" error={shown.label}>
         <TextInput placeholder="e.g. Account One" {...text('label')} />
       </Field>
       <Field label="Email">

@@ -27,19 +27,27 @@ export function CompleteHoldSheet({
   const complete = useCompleteShortHold();
   const [shown, setShown] = useState<CompleteTarget | null>(target);
   const [soldPrice, setSoldPrice] = useState('');
+  const [attempted, setAttempted] = useState(false);
 
   if (target && target !== shown) {
     setShown(target);
     setSoldPrice('');
+    setAttempted(false);
     session.reset();
   }
 
   const profit = profitFor(soldPrice, shown?.spent ?? 0);
   const validation = validateHoldSale(soldPrice, shown?.spent ?? 0);
-  const problem = 'error' in validation ? validation.error : null;
+  const errors = 'errors' in validation ? validation.errors : {};
+  const shownErrors = attempted ? errors : {};
 
   function submit() {
-    if (!target || 'error' in validation) return;
+    if (!target) return;
+    if ('errors' in validation) {
+      setAttempted(true);
+
+      return;
+    }
     const vars = { holdName: target.holdName, ...validation };
     complete.mutate({ requestId: session.idFor(vars), ...vars }, { onSuccess: onClose });
   }
@@ -50,12 +58,11 @@ export function CompleteHoldSheet({
       onClose={onClose}
       title="Complete Short Hold"
       subtitle={shown && `Completing ${shown.holdName} · Total spent: ${formatMoney(shown.spent)}`}
-      hint={problem}
       footer={
         <>
           <CancelButton onClick={onClose} />
           <SaveButton
-            disabled={!!problem}
+            invalid={'errors' in validation}
             pending={complete.isPending}
             label="Complete & Start Next Hold"
             pendingLabel="Completing…"
@@ -66,7 +73,7 @@ export function CompleteHoldSheet({
       }
     >
       <FieldRow>
-        <Field label="Sold Price (total)">
+        <Field label="Sold Price (total)" error={shownErrors.soldPrice}>
           <MoneyInput placeholder="0.00" value={soldPrice} onChange={(e) => setSoldPrice(e.target.value)} />
         </Field>
         <Field label="Profit">

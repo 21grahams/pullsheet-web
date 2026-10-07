@@ -12,7 +12,6 @@ interface SheetProps {
   subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
-  hint?: string | null;
 }
 
 const CLOSE_FRACTION = 1 / 3; // dragged this far down the sheet's height closes it
@@ -55,7 +54,7 @@ function useDragToClose(onClose: () => void) {
   };
 }
 
-export function Sheet({ open, onClose, title, subtitle, children, footer, hint }: SheetProps) {
+export function Sheet({ open, onClose, title, subtitle, children, footer }: SheetProps) {
   // iOS scrolls the page under the sheet to make room for the keyboard and
   // never scrolls it back, so put the page back where it was on close.
   const [savedScroll, setSavedScroll] = useState(0);
@@ -113,7 +112,6 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
         {subtitle && <Box sx={{ fontSize: 13, color: tokens.text2, mb: 2.5 }}>{subtitle}</Box>}
       </Box>
       {children}
-      {hint && <Box sx={{ fontSize: 12, color: tokens.text3, textAlign: 'center', mt: 2 }}>{hint}</Box>}
       {footer && (
         <Box
           sx={{
@@ -132,9 +130,24 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
   );
 }
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string | null;
+  children: ReactNode;
+}) {
   return (
-    <Box sx={{ mb: 1.75 }}>
+    <Box
+      sx={{
+        mb: 1.75,
+        ...(error && {
+          '& input, & select, & textarea, & [data-field-box]': { borderColor: `${tokens.red} !important` },
+        }),
+      }}
+    >
       <Box
         component="label"
         sx={{
@@ -149,6 +162,11 @@ export function Field({ label, children }: { label: string; children: ReactNode 
         {label}
       </Box>
       {children}
+      {error && (
+        <Box role="alert" sx={{ fontSize: 11, color: tokens.red, mt: 0.5 }}>
+          {error}
+        </Box>
+      )}
     </Box>
   );
 }

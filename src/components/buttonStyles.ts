@@ -7,5 +7,6 @@ export const greenButtonSx = {
   color: tokens.green,
   border: '1px solid rgba(52,199,123,0.25)',
   boxShadow: 'none',
-  '&:hover': { backgroundColor: 'rgba(52,199,123,0.2)', boxShadow: 'none' },
+  '&:hover:not(.Mui-disabled)': { backgroundColor: 'rgba(52,199,123,0.2)', boxShadow: 'none' },
+  '&.Mui-disabled': { borderColor: 'transparent' },
 };

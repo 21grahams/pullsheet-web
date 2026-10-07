@@ -34,11 +34,14 @@ export function formFromAccount(a: RetailerAccount): AccountFormValues {
   };
 }
 
-export function validateAccountForm(f: AccountFormValues): string | null {
-  if (!f.retailer.trim()) return 'Enter a retailer';
-  if (!f.label.trim()) return 'Enter an account label';
+export type AccountFormErrors = Partial<Record<'retailer' | 'label', string>>;
 
-  return null;
+export function validateAccountForm(f: AccountFormValues): AccountFormErrors {
+  const errors: AccountFormErrors = {};
+  if (!f.retailer.trim()) errors.retailer = 'Enter a retailer';
+  if (!f.label.trim()) errors.label = 'Enter an account label';
+
+  return errors;
 }
 
 export function toAccountInput(f: AccountFormValues): AccountInput {
