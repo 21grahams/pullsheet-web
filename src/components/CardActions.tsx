@@ -2,9 +2,10 @@ import { Box } from '@mui/material';
 import type { ReactNode } from 'react';
 import { tokens } from '../theme/tokens';
 
-type Variant = 'secondary' | 'green' | 'danger';
+type Variant = 'primary' | 'secondary' | 'green' | 'danger';
 
 const STYLES: Record<Variant, object> = {
+  primary: { backgroundColor: tokens.gold, color: '#0E0F11', border: `1px solid ${tokens.gold}` },
   secondary: { backgroundColor: tokens.surface2, color: tokens.text, border: `1px solid ${tokens.border}` },
   green: {
     backgroundColor: 'rgba(52,199,123,0.12)',

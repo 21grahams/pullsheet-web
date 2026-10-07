@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
 import { flipSign } from '../lib/sellForm';
 import { fonts, tokens } from '../theme/tokens';
 
@@ -16,11 +16,16 @@ const inputSx = {
   WebkitAppearance: 'none',
   colorScheme: 'dark',
   '&:focus': { borderColor: tokens.gold },
+  '&:disabled': { opacity: 0.6 },
   '&::placeholder': { color: tokens.text3 },
 } as const;
 
 export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return <Box component="input" sx={inputSx} {...props} />;
+}
+
+export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <Box component="textarea" sx={{ ...inputSx, resize: 'vertical' }} {...props} />;
 }
 
 /** Text input that brings up the decimal keypad on phones. */

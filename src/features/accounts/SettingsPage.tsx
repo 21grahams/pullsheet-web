@@ -3,6 +3,10 @@ import { useState, type ReactNode } from 'react';
 import { CardButton } from '../../components/CardActions';
 import { tokens } from '../../theme/tokens';
 import { useAuth } from '../auth/authContext';
+import type { RetailerAccount } from '../../api/types';
+import { useAccounts } from '../../hooks/queries';
+import { AccountSheet } from './AccountSheet';
+import { RemoveAccountDialog } from './RemoveAccountDialog';
 import { RetailerAccounts } from './RetailerAccounts';
 
 function formatBuiltAt(iso: string): string {
@@ -64,6 +68,11 @@ function Row({ children }: { children: ReactNode }) {
 export function SettingsPage() {
   const { session, signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
+  const accounts = useAccounts();
+  const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<RetailerAccount | null>(null);
+  const [removing, setRemoving] = useState<RetailerAccount | null>(null);
+  const retailers = [...new Set((accounts.data ?? []).map((a) => a.retailer))];
 
   return (
     <Box sx={{ mt: 1 }}>
@@ -100,10 +109,13 @@ export function SettingsPage() {
 
       <Section
         label="Retailer Accounts"
-        // Adding accounts arrives in Phase 3.
-        action={<CardButton disabled>+ Add</CardButton>}
+        action={
+          <CardButton variant="primary" onClick={() => setAdding(true)}>
+            + Add
+          </CardButton>
+        }
       >
-        <RetailerAccounts />
+        <RetailerAccounts onEdit={setEditing} onRemove={setRemoving} />
       </Section>
 
       <Section label="About">
@@ -117,6 +129,14 @@ export function SettingsPage() {
           </Box>
         </Row>
       </Section>
+      <AccountSheet open={adding} editing={null} retailers={retailers} onClose={() => setAdding(false)} />
+      <AccountSheet
+        open={editing != null}
+        editing={editing}
+        retailers={retailers}
+        onClose={() => setEditing(null)}
+      />
+      <RemoveAccountDialog account={removing} onClose={() => setRemoving(null)} />
     </Box>
   );
 }

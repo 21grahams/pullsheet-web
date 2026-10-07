@@ -9,7 +9,17 @@ import { fonts, tokens } from '../../theme/tokens';
 
 const detail = { fontSize: 12, color: tokens.text2, fontFamily: fonts.mono, mt: '3px' } as const;
 
-function AccountCard({ account, color }: { account: RetailerAccount; color: string }) {
+interface CardHandlers {
+  onEdit: (a: RetailerAccount) => void;
+  onRemove: (a: RetailerAccount) => void;
+}
+
+function AccountCard({
+  account,
+  color,
+  onEdit,
+  onRemove,
+}: { account: RetailerAccount; color: string } & CardHandlers) {
   return (
     <Box
       sx={{
@@ -42,9 +52,8 @@ function AccountCard({ account, color }: { account: RetailerAccount; color: stri
         </Box>
       )}
       <Box sx={{ display: 'flex', gap: 0.75, mt: 1 }}>
-        {/* Editing arrives in Phase 3. */}
-        <CardButton disabled>Edit</CardButton>
-        <CardButton variant="danger" disabled>
+        <CardButton onClick={() => onEdit(account)}>Edit</CardButton>
+        <CardButton variant="danger" onClick={() => onRemove(account)}>
           Remove
         </CardButton>
       </Box>
@@ -52,7 +61,7 @@ function AccountCard({ account, color }: { account: RetailerAccount; color: stri
   );
 }
 
-function Group({ group }: { group: RetailerGroup }) {
+function Group({ group, ...handlers }: { group: RetailerGroup } & CardHandlers) {
   // Starts collapsed so emails and card digits only show when you open a group.
   const [collapsed, setCollapsed] = useState(true);
   const n = group.accounts.length;
@@ -101,7 +110,7 @@ function Group({ group }: { group: RetailerGroup }) {
       {!collapsed && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {group.accounts.map((a) => (
-            <AccountCard key={a.id} account={a} color={group.color} />
+            <AccountCard key={a.id} account={a} color={group.color} {...handlers} />
           ))}
         </Box>
       )}
@@ -110,7 +119,7 @@ function Group({ group }: { group: RetailerGroup }) {
 }
 
 /** The Retailer Accounts list inside Settings. */
-export function RetailerAccounts() {
+export function RetailerAccounts(handlers: CardHandlers) {
   const accounts = useAccounts();
   if (!accounts.data) {
     return accounts.isError ? (
@@ -131,7 +140,7 @@ export function RetailerAccounts() {
   return (
     <Box>
       {groups.map((g) => (
-        <Group key={g.retailer} group={g} />
+        <Group key={g.retailer} group={g} {...handlers} />
       ))}
     </Box>
   );
