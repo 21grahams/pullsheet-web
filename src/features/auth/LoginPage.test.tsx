@@ -41,11 +41,15 @@ function fillAndSubmit(email: string, password: string) {
 }
 
 describe('LoginPage', () => {
-  it('keeps the button disabled until both fields are filled', () => {
-    renderLogin();
-    expect(screen.getByRole('button', { name: /log in/i })).toBeDisabled();
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'me@example.com' } });
-    expect(screen.getByRole('button', { name: /log in/i })).toBeDisabled();
+  it('looks disabled until valid, and tapping it points at each problem field', async () => {
+    const { signIn } = renderLogin();
+    const button = screen.getByRole('button', { name: /log in/i });
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'me@example' } });
+    fireEvent.click(button);
+    expect(await screen.findByText('Enter a valid email')).toBeInTheDocument();
+    expect(screen.getByText('Enter your password')).toBeInTheDocument();
+    expect(signIn).not.toHaveBeenCalled();
   });
 
   it('passes the credentials to signIn', async () => {

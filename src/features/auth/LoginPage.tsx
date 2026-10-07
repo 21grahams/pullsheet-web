@@ -1,11 +1,13 @@
 import type { FormEvent } from 'react';
 
-import { Alert, Box, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Navigate } from 'react-router';
 
 import { PracticeBanner } from '../../components/PracticeBanner';
+import { SaveButton } from '../../components/SaveButton';
 import { Wordmark } from '../../components/Wordmark';
+import { validateLogin } from '../../lib/loginForm';
 import { useAuth } from './authContext';
 
 export function LoginPage() {
@@ -14,12 +16,22 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [attempted, setAttempted] = useState(false);
 
   if (session) return <Navigate to="/" replace />;
+
+  const errors = validateLogin(email, password);
+  const invalid = Object.keys(errors).length > 0;
+  const shown = attempted ? errors : {};
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (submitting) return;
+    if (invalid) {
+      setAttempted(true);
+
+      return;
+    }
     setSubmitting(true);
     setError(null);
     const message = await signIn(email, password);
@@ -54,6 +66,8 @@ export function LoginPage() {
             autoCapitalize="none"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={!!shown.email}
+            helperText={shown.email}
             required
             fullWidth
           />
@@ -63,18 +77,19 @@ export function LoginPage() {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={!!shown.password}
+            helperText={shown.password}
             required
             fullWidth
           />
-          <Button
+          <SaveButton
             type="submit"
-            variant="contained"
             size="large"
-            disabled={submitting || !email || !password}
-            startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : null}
-          >
-            {submitting ? 'Logging in…' : 'Log in'}
-          </Button>
+            invalid={invalid}
+            pending={submitting}
+            label="Log in"
+            pendingLabel="Logging in…"
+          />
           <Typography variant="caption" color="text.secondary" align="center">
             Pokémon collection portfolio tracker
           </Typography>
