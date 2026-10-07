@@ -2,13 +2,14 @@ import type { RetailerAccount } from '../../api/types';
 import type { RetailerGroup } from '../../lib/retailers';
 
 import { Box } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 import { CardButton } from '../../components/CardActions';
 import { ErrorState, LoadingState } from '../../components/ListStates';
 import { useAccounts } from '../../hooks/queries';
-import { useStickyState } from '../../hooks/useStickyState';
 import { groupAccounts } from '../../lib/retailers';
 import { fonts, tokens } from '../../theme/tokens';
+import { EyeButton } from './EyeButton';
 
 const detail = { fontSize: 12, color: tokens.text2, fontFamily: fonts.mono, mt: '3px' } as const;
 
@@ -23,6 +24,20 @@ function AccountCard({
   onEdit,
   onRemove,
 }: { account: RetailerAccount; color: string } & CardHandlers) {
+  const [revealed, setRevealed] = useState(false);
+
+  // Re-mask when the app goes to the background (switching apps, locking the phone).
+  useEffect(() => {
+    const hide = () => {
+      if (document.visibilityState === 'hidden') setRevealed(false);
+    };
+    document.addEventListener('visibilitychange', hide);
+
+    return () => document.removeEventListener('visibilitychange', hide);
+  }, []);
+
+  const show = (value: string, dots: string) => (value ? (revealed ? value : dots) : '—');
+
   return (
     <Box
       sx={{
@@ -43,15 +58,20 @@ function AccountCard({
         },
       }}
     >
-      <Box sx={{ fontSize: 14, fontWeight: 600 }}>{account.label}</Box>
-      <Box sx={detail}>{account.email || '—'}</Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+        <Box sx={{ fontSize: 14, fontWeight: 600 }}>{account.label}</Box>
+        <EyeButton revealed={revealed} onClick={() => setRevealed((r) => !r)} />
+      </Box>
+      <Box sx={detail}>{show(account.email, '••••••••••••')}</Box>
       <Box sx={detail}>
-        Card •• {account.cardLast2 || '—'} · Phone •••• {account.phoneLast4 || '—'}
+        Card •• {show(account.cardLast2, '••')} · Phone •••• {show(account.phoneLast4, '••••')}
       </Box>
       {account.loop && <Box sx={detail}>Loop: {account.loop}</Box>}
       {account.notes && (
-        <Box sx={{ ...detail, fontFamily: 'inherit', whiteSpace: 'pre-wrap', mt: '5px' }}>
-          {account.notes}
+        <Box
+          sx={{ ...detail, fontFamily: revealed ? 'inherit' : fonts.mono, whiteSpace: 'pre-wrap', mt: '5px' }}
+        >
+          {revealed ? account.notes : '••••••••••••'}
         </Box>
       )}
       <Box sx={{ display: 'flex', gap: 0.75, mt: 1 }}>
@@ -64,15 +84,18 @@ function AccountCard({
   );
 }
 
-function Group({ group, ...handlers }: { group: RetailerGroup } & CardHandlers) {
-  // Starts collapsed on each launch so emails and card digits only show when you open a group.
-  const [collapsed, setCollapsed] = useStickyState(`ui:accounts-collapsed:${group.retailer}`, true);
+function Group({
+  group,
+  collapsed,
+  onToggle,
+  ...handlers
+}: { group: RetailerGroup; collapsed: boolean; onToggle: () => void } & CardHandlers) {
   const n = group.accounts.length;
 
   return (
     <Box sx={{ mb: 0.5 }}>
       <Box
-        onClick={() => setCollapsed((c) => !c)}
+        onClick={onToggle}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -122,8 +145,13 @@ function Group({ group, ...handlers }: { group: RetailerGroup } & CardHandlers) 
   );
 }
 
-export function RetailerAccounts(handlers: CardHandlers) {
+export function RetailerAccounts({
+  isCollapsed,
+  toggle,
+  ...handlers
+}: { isCollapsed: (retailer: string) => boolean; toggle: (retailer: string) => void } & CardHandlers) {
   const accounts = useAccounts();
+  const groups = groupAccounts(accounts.data ?? []);
   if (!accounts.data) {
     return accounts.isError ? (
       <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} />
@@ -132,7 +160,6 @@ export function RetailerAccounts(handlers: CardHandlers) {
     );
   }
 
-  const groups = groupAccounts(accounts.data);
   if (groups.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 2.5, color: tokens.text3, fontSize: 13 }}>
@@ -144,7 +171,13 @@ export function RetailerAccounts(handlers: CardHandlers) {
   return (
     <Box>
       {groups.map((g) => (
-        <Group key={g.retailer} group={g} {...handlers} />
+        <Group
+          key={g.retailer}
+          group={g}
+          collapsed={isCollapsed(g.retailer)}
+          onToggle={() => toggle(g.retailer)}
+          {...handlers}
+        />
       ))}
     </Box>
   );

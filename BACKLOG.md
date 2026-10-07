@@ -2,10 +2,6 @@
 
 Ideas agreed for **after** the new app matches the old one (parity first). Not scheduled yet.
 
-- **Mask retailer account details.** Show emails, card/phone digits and notes as dots by
-  default, with a per-card eye icon to reveal; re-mask when leaving the screen. No password
-  (the data is already on the device, and a password would add friction 20–30×/day). Face ID
-  "unlock to reveal" belongs in the future Swift app, where it's native.
 - **Backend comment cleanup.** Frontend done (2026-10-06). After cutover, as part of retiring
   `legacy_*`, trim backend comments to non-obvious "why" notes (never edit applied migrations;
   do it in the retirement migration, scripts and README).
@@ -31,3 +27,5 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   custom domain, GitHub repo names, and tidying the Mac folders at the same time (`~/Pullsheet`
   vs `~/pullsheet-web`): moving the backend folder means updating the nightly backup job's paths,
   the practice setup, and Claude's per-project notes together.
+- **Face ID to reveal account details** (Swift app). The web app masks details behind a tap with
+  no password, since a password would add friction 20–30×/day; Face ID makes a real lock cheap.

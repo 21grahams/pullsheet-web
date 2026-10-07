@@ -9,10 +9,11 @@ import { useMemo, useState } from 'react';
 
 import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
+import { CollapseAllButton } from '../../components/CollapseAllButton';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
 import { useAppContext, useSealed } from '../../hooks/queries';
-import { useStickyState } from '../../hooks/useStickyState';
+import { useCollapsibleGroups } from '../../hooks/useCollapsibleGroups';
 import { cardNumbers, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary } from '../../lib/sealedGroups';
@@ -145,8 +146,6 @@ function SealedCard({
 export function SealedPage() {
   const sealed = useSealed();
   const context = useAppContext();
-  const [collapsed, setCollapsed] = useStickyState<Record<number, boolean>>('ui:sealed-collapsed', {}, true);
-  const [allCollapsed, setAllCollapsed] = useStickyState('ui:sealed-all-collapsed', false, true);
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<SealedItem | null>(null);
   const [removing, setRemoving] = useState<SealedItem | null>(null);
@@ -156,26 +155,17 @@ export function SealedPage() {
   const [completing, setCompleting] = useState<CompleteTarget | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
+  const { isCollapsed, toggle, allCollapsed, toggleAll } = useCollapsibleGroups(
+    'ui:sealed',
+    groups.map((g) => g.holdId),
+    { persist: true },
+  );
 
   if (!sealed.data || !context.data) {
     if (sealed.isError) return <ErrorState error={sealed.error} onRetry={() => sealed.refetch()} />;
     if (context.isError) return <ErrorState error={context.error} onRetry={() => context.refetch()} />;
 
     return <LoadingState />;
-  }
-
-  function toggleGroup(holdId: number) {
-    const next = { ...collapsed, [holdId]: !collapsed[holdId] };
-    setCollapsed(next);
-    const states = groups.map((g) => !!next[g.holdId]);
-    if (states.every(Boolean)) setAllCollapsed(true);
-    else if (!states.some(Boolean)) setAllCollapsed(false);
-  }
-
-  function toggleAll() {
-    const next = !allCollapsed;
-    setAllCollapsed(next);
-    setCollapsed(Object.fromEntries(groups.map((g) => [g.holdId, next])));
   }
 
   const addSheet = (
@@ -220,39 +210,20 @@ export function SealedPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Box
-          component="button"
-          onClick={toggleAll}
-          sx={{
-            backgroundColor: tokens.surface2,
-            border: `1px solid ${tokens.border}`,
-            borderRadius: '10px',
-            px: 1.75,
-            py: 1.25,
-            color: tokens.text,
-            fontSize: 14,
-            fontFamily: 'inherit',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {allCollapsed ? '▸ Expand All' : '▾ Collapse All'}
-        </Box>
-      </Box>
+      <CollapseAllButton allCollapsed={allCollapsed} onClick={toggleAll} />
 
       {groups.map((group) => {
-        const isCollapsed = !!collapsed[group.holdId];
+        const groupCollapsed = isCollapsed(group.holdId);
 
         return (
           <Box key={group.holdId} sx={{ mb: 0.5 }}>
             <GroupHeader
               group={group}
-              collapsed={isCollapsed}
-              onToggle={() => toggleGroup(group.holdId)}
+              collapsed={groupCollapsed}
+              onToggle={() => toggle(group.holdId)}
               onComplete={() => setCompleting({ holdName: group.name, spent: totals(group.items).totalCost })}
             />
-            {!isCollapsed && (
+            {!groupCollapsed && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {group.items.map((item) => (
                   <SealedCard

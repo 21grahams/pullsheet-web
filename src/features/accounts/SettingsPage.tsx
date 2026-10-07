@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import { CardButton } from '../../components/CardActions';
 import { useAccounts } from '../../hooks/queries';
+import { collapseAllLabel, useCollapsibleGroups } from '../../hooks/useCollapsibleGroups';
 import { tokens } from '../../theme/tokens';
 import { useAuth } from '../auth/authContext';
 import { AccountSheet } from './AccountSheet';
@@ -73,6 +74,8 @@ export function SettingsPage() {
   const [editing, setEditing] = useState<RetailerAccount | null>(null);
   const [removing, setRemoving] = useState<RetailerAccount | null>(null);
   const retailers = [...new Set((accounts.data ?? []).map((a) => a.retailer))];
+  // Starts collapsed on each launch so account details only show when you open a group.
+  const groups = useCollapsibleGroups('ui:accounts', retailers, { startCollapsed: true });
 
   return (
     <Box sx={{ mt: 1 }}>
@@ -110,12 +113,22 @@ export function SettingsPage() {
       <Section
         label="Retailer Accounts"
         action={
-          <CardButton variant="primary" onClick={() => setAdding(true)}>
-            + Add
-          </CardButton>
+          <Box sx={{ display: 'flex', gap: 0.75 }}>
+            {retailers.length > 0 && (
+              <CardButton onClick={groups.toggleAll}>{collapseAllLabel(groups.allCollapsed)}</CardButton>
+            )}
+            <CardButton variant="primary" onClick={() => setAdding(true)}>
+              + Add
+            </CardButton>
+          </Box>
         }
       >
-        <RetailerAccounts onEdit={setEditing} onRemove={setRemoving} />
+        <RetailerAccounts
+          isCollapsed={groups.isCollapsed}
+          toggle={groups.toggle}
+          onEdit={setEditing}
+          onRemove={setRemoving}
+        />
       </Section>
 
       <Section label="About">
