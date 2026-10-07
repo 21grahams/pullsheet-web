@@ -40,3 +40,55 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry: () => 
     </EmptyState>
   );
 }
+
+/** A section with nothing in it yet: one big + in the middle instead of the usual corner button. */
+export function EmptyCollection({
+  title,
+  action,
+  onAdd,
+}: {
+  title: string;
+  action: string;
+  onAdd: () => void;
+}) {
+  return (
+    <Box
+      sx={{
+        minHeight: '50dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        gap: 1.5,
+        px: 2.5,
+      }}
+    >
+      <Box sx={{ fontSize: 16, color: tokens.text2 }}>{title}</Box>
+      <Box
+        component="button"
+        type="button"
+        aria-label={action}
+        onClick={onAdd}
+        sx={{
+          width: 64,
+          height: 64,
+          borderRadius: '32px',
+          border: 'none',
+          backgroundColor: tokens.gold,
+          color: tokens.bg,
+          fontSize: 30,
+          cursor: 'pointer',
+          boxShadow: '0 4px 20px rgba(232,168,56,0.4)',
+          display: 'grid',
+          placeItems: 'center',
+          transition: 'transform 0.15s',
+          '&:active': { transform: 'scale(0.95)' },
+        }}
+      >
+        +
+      </Box>
+      <Box sx={{ fontSize: 13, color: tokens.text3 }}>{action}</Box>
+    </Box>
+  );
+}

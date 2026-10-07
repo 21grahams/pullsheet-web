@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { ItemCard } from '../../components/ItemCard';
-import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
+import { EmptyCollection, EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
 import { useAppContext, useSingles } from '../../hooks/queries';
 import { useStickyState } from '../../hooks/useStickyState';
 import { cardNumbers, cardsLabel, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
@@ -202,7 +202,7 @@ export function SinglesPage() {
       </Box>
 
       {all.length === 0 ? (
-        <EmptyState icon="🃏">No singles yet. Tap + to add.</EmptyState>
+        <EmptyCollection title="No singles yet" action="Add your first card" onAdd={() => setAddOpen(true)} />
       ) : shown.length === 0 ? (
         <EmptyState icon="🔍">
           <Box sx={{ mb: 1.25 }}>No cards match your search/filters.</Box>
@@ -281,7 +281,7 @@ export function SinglesPage() {
         </>
       )}
 
-      <AddButton label="Add single card" onClick={() => setAddOpen(true)} />
+      {all.length > 0 && <AddButton label="Add single card" onClick={() => setAddOpen(true)} />}
       <ItemFormSheet
         kind="single"
         open={addOpen}

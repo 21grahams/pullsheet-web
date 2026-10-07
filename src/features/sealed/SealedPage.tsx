@@ -11,7 +11,7 @@ import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { CollapseAllButton } from '../../components/CollapseAllButton';
 import { ItemCard } from '../../components/ItemCard';
-import { EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
+import { EmptyCollection, ErrorState, LoadingState } from '../../components/ListStates';
 import { useAppContext, useSealed } from '../../hooks/queries';
 import { useCollapsibleGroups } from '../../hooks/useCollapsibleGroups';
 import { cardNumbers, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
@@ -170,7 +170,6 @@ export function SealedPage() {
 
   const addSheet = (
     <>
-      <AddButton label="Add sealed product" onClick={() => setAddOpen(true)} />
       <QuarterSheet target={quarterTarget} onClose={() => setQuarterTarget(null)} />
       <SellSheet target={selling} onClose={() => setSelling(null)} />
       <MoveSheet
@@ -202,7 +201,11 @@ export function SealedPage() {
   if (groups.length === 0) {
     return (
       <>
-        <EmptyState icon="📦">No sealed product yet.</EmptyState>
+        <EmptyCollection
+          title="No sealed product yet"
+          action="Add your first sealed product"
+          onAdd={() => setAddOpen(true)}
+        />
         {addSheet}
       </>
     );
@@ -258,6 +261,7 @@ export function SealedPage() {
           </Box>
         );
       })}
+      <AddButton label="Add sealed product" onClick={() => setAddOpen(true)} />
       {addSheet}
     </Box>
   );

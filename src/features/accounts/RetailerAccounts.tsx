@@ -5,7 +5,7 @@ import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 import { CardButton } from '../../components/CardActions';
-import { ErrorState, LoadingState } from '../../components/ListStates';
+import { EmptyCollection, ErrorState, LoadingState } from '../../components/ListStates';
 import { useAccounts } from '../../hooks/queries';
 import { groupAccounts } from '../../lib/retailers';
 import { fonts, tokens } from '../../theme/tokens';
@@ -148,8 +148,13 @@ function Group({
 export function RetailerAccounts({
   isCollapsed,
   toggle,
+  onAdd,
   ...handlers
-}: { isCollapsed: (retailer: string) => boolean; toggle: (retailer: string) => void } & CardHandlers) {
+}: {
+  isCollapsed: (retailer: string) => boolean;
+  toggle: (retailer: string) => void;
+  onAdd: () => void;
+} & CardHandlers) {
   const accounts = useAccounts();
   const groups = groupAccounts(accounts.data ?? []);
   if (!accounts.data) {
@@ -161,11 +166,7 @@ export function RetailerAccounts({
   }
 
   if (groups.length === 0) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 2.5, color: tokens.text3, fontSize: 13 }}>
-        No accounts yet. Tap + Add to start tracking.
-      </Box>
-    );
+    return <EmptyCollection title="No accounts yet" action="Add your first account" onAdd={onAdd} />;
   }
 
   return (

@@ -35,18 +35,19 @@ export function AccountsPage() {
         }}
       >
         <span>Retailer Accounts</span>
-        <Box sx={{ display: 'flex', gap: 0.75 }}>
-          {retailers.length > 0 && (
+        {retailers.length > 0 && (
+          <Box sx={{ display: 'flex', gap: 0.75 }}>
             <CardButton onClick={groups.toggleAll}>{collapseAllLabel(groups.allCollapsed)}</CardButton>
-          )}
-          <CardButton variant="primary" onClick={() => setAdding(true)}>
-            + Add
-          </CardButton>
-        </Box>
+            <CardButton variant="primary" onClick={() => setAdding(true)}>
+              + Add
+            </CardButton>
+          </Box>
+        )}
       </Box>
       <RetailerAccounts
         isCollapsed={groups.isCollapsed}
         toggle={groups.toggle}
+        onAdd={() => setAdding(true)}
         onEdit={setEditing}
         onRemove={setRemoving}
       />
