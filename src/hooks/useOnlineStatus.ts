@@ -9,7 +9,6 @@ function subscribe(onChange: () => void) {
   };
 }
 
-/** True while the device reports a network connection. */
 export function useOnlineStatus(): boolean {
   return useSyncExternalStore(
     subscribe,

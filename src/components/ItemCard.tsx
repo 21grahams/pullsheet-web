@@ -8,12 +8,9 @@ import { useNotify } from './notifyContext';
 interface ItemCardProps {
   title: string;
   subtitle: ReactNode;
-  /** What the copy icon puts on the clipboard. */
   copyText: string;
   numbers: CardNumbers;
-  /** e.g. "$3.39 × 2 units"; omitted when there are no PAS fees. */
   feesLabel: string | null;
-  /** Q1–Q4 boxes; omitted for Short Hold items. */
   quarters?: QuarterBox[];
   onQuarterClick?: (q: QuarterBox) => void;
   actions?: ReactNode;
@@ -36,7 +33,6 @@ const metaValue = { ...mono, fontSize: 12, color: tokens.text2, mt: '2px' } as c
 const finePrint = { fontSize: 11, color: tokens.text3 } as const;
 const divider = { mt: 1.25, pt: 1.25, borderTop: `1px solid ${tokens.border}` } as const;
 
-/** Gain/loss in green/red, with its percentage underneath. */
 function GainCell({ amount, pct }: { amount: number; pct: number }) {
   return (
     <Box
@@ -88,8 +84,6 @@ function QuarterGrid({
             {q.label}
             {q.active ? ' ●' : ''}
           </Box>
-          {/* Green if up vs cost (Q1) or the previous quarter, red if down,
-              grey when there's nothing to compare against. */}
           <Box
             sx={{
               ...mono,
@@ -114,7 +108,6 @@ function QuarterGrid({
   );
 }
 
-/** One Single or Sealed card, laid out like the old app's. */
 export function ItemCard({
   title,
   subtitle,
@@ -156,7 +149,6 @@ export function ItemCard({
         },
       }}
     >
-      {/* Name + subtitle on the left, per-unit value on the right */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
         <Box sx={{ minWidth: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -191,7 +183,6 @@ export function ItemCard({
         </Box>
       </Box>
 
-      {/* Total cost / value and the gain */}
       <Box sx={{ ...divider, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -210,7 +201,6 @@ export function ItemCard({
       </Box>
       {feesLabel && <Box sx={{ ...finePrint, mt: '2px' }}>PAS Fees: {feesLabel}</Box>}
 
-      {/* The 80% exit row */}
       <Box
         sx={{
           ...divider,

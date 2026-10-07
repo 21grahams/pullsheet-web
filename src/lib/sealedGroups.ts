@@ -1,5 +1,3 @@
-// Long Hold first, then Short Holds newest to oldest; items newest-added first.
-
 import type { HoldStatus, SealedItem } from '../api/types';
 import { formatMoney } from './format';
 import { totals } from './cardMath';
@@ -29,10 +27,6 @@ export function groupSealed(items: readonly SealedItem[]): SealedGroup[] {
     .map((g) => ({ ...g, items: newestFirst(g.items) }));
 }
 
-/**
- * The header summary, as in the old app: "23 units · $2,856.35 · $2,285.08 @80%"
- * for Long Hold, "12 units · $641.55" for Short Holds.
- */
 export function groupSummary(group: SealedGroup): string {
   const t = totals(group.items);
   const base = `${t.units} units · ${formatMoney(t.totalValue)}`;

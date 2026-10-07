@@ -1,6 +1,3 @@
-// The app's only formatters. Every number and date on screen goes through
-// these, matching the old app character for character.
-
 /**
  * "$1,234.56". Negatives print as "$-110.00" for parity with the old app.
  * To switch to the conventional "-$110.00", change only this function.
@@ -15,13 +12,11 @@ export function formatMoney(n: number | null | undefined): string {
   );
 }
 
-/** A percentage that's already ×100, signed: "+11.2%", "-0.4%". "—" if not a number. */
 export function formatSignedPct(pct: number): string {
   if (Number.isNaN(pct)) return '—';
   return (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
 }
 
-/** A ratio (0.331) as an unsigned percentage: "33.1%". Used for markup and margin. */
 export function formatRatioPct(ratio: number): string {
   return (ratio * 100).toFixed(1) + '%';
 }

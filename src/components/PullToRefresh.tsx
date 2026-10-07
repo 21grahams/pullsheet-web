@@ -14,11 +14,7 @@ const LABELS: Record<Exclude<State, 'idle'>, string> = {
   refreshing: 'Refreshing…',
 };
 
-/**
- * Pull down at the top of the page to re-fetch the data on screen. iPhone
- * home-screen apps have no built-in pull-to-refresh, so this recreates the old
- * app's custom gesture. `top` is where the pill sits (just under the tabs).
- */
+/** iPhone home-screen apps have no built-in pull-to-refresh. `top` is where the pill sits. */
 export function PullToRefresh({ top }: { top: number }) {
   const queryClient = useQueryClient();
   const [state, setState] = useState<State>('idle');

@@ -1,8 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 import { fonts, tokens } from './tokens';
 
-// MUI supplies behavior (focus, accessibility, keyboard); the look comes
-// from the old app's tokens so the new app reads as the same PullSheet.
 export const theme = createTheme({
   palette: {
     mode: 'dark',

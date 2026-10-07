@@ -2,7 +2,6 @@ import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { tokens } from '../theme/tokens';
 
-/** Round ▲ button, bottom-right, shown once you've scrolled ~300px (as in the old app). */
 export function ScrollTopButton() {
   const [visible, setVisible] = useState(false);
 
@@ -28,7 +27,7 @@ export function ScrollTopButton() {
       sx={{
         position: 'fixed',
         right: 20,
-        // Leaves room below for the + button (Phase 3).
+        // Leaves room below for the + button.
         bottom: 'calc(24px + 52px + 12px + env(safe-area-inset-bottom))',
         width: 40,
         height: 40,

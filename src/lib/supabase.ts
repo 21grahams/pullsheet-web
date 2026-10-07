@@ -17,7 +17,7 @@ export const supabase = createClient<Database>(
   publishableKey,
   {
     auth: {
-      persistSession: true, // log in once, stay in (survives app restarts)
+      persistSession: true,
       autoRefreshToken: true,
       // No magic links or OAuth redirects (iOS home-screen apps keep separate
       // storage from Safari), so never look for a session in the URL. This

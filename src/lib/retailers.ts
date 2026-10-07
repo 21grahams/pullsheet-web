@@ -14,7 +14,6 @@ const RETAILER_PALETTE = [
   '#C9A24B',
 ] as const;
 
-/** A stable color per retailer name (case and surrounding spaces ignored). */
 export function retailerColor(name: string): string {
   let hash = 0;
   const str = name.toLowerCase().trim();
@@ -28,7 +27,6 @@ export interface RetailerGroup {
   accounts: RetailerAccount[];
 }
 
-/** Groups accounts by retailer, keeping the API's order (retailers in the order first added). */
 export function groupAccounts(accounts: readonly RetailerAccount[]): RetailerGroup[] {
   const groups = new Map<string, RetailerGroup>();
   for (const a of accounts) {

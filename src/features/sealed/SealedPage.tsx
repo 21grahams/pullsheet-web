@@ -112,7 +112,6 @@ function SealedCard({
       // Short Hold items with no price show their cost as their value (old-app behavior).
       numbers={cardNumbers(item, { fallbackToCost: !isLong })}
       feesLabel={pasFeesLabel(item.fees, item.feeUnits)}
-      // Quarter tracking is Long Hold only, never Short Hold.
       quarters={
         isLong ? quarterBoxes(item.quarterUnitValues, item.quantity, item.totalCost, year) : undefined
       }
@@ -156,9 +155,6 @@ export function SealedPage() {
     return <LoadingState />;
   }
 
-  // Toggling groups by hand keeps the button honest: once every group is
-  // collapsed it offers "Expand All", once every group is expanded it offers
-  // "Collapse All", and a mix leaves it as it was.
   function toggleGroup(holdId: number) {
     const next = { ...collapsed, [holdId]: !collapsed[holdId] };
     setCollapsed(next);

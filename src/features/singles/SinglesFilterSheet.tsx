@@ -29,7 +29,6 @@ const inputSx = {
 };
 
 export function SinglesFilterSheet({ open, onClose, filters, onApply, options }: Props) {
-  // Edits stay local until Apply, like the old app.
   const [draft, setDraft] = useState(filters);
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {

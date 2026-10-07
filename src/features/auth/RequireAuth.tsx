@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { Navigate } from 'react-router';
 import { useAuth } from './authContext';
 
-/** Shows its children only when logged in; otherwise sends you to the login screen. */
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth();
 

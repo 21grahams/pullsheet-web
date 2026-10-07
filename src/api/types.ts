@@ -16,14 +16,11 @@ export interface AppContext {
 interface ItemBase {
   id: number;
   quantity: number;
-  /** "YYYY-MM-DD", or null if unknown. */
   purchaseDate: string | null;
   /** Total cost paid, PAS fees included. */
   totalCost: number;
-  /** The PAS fee portion of totalCost, kept for display. */
   fees: number;
   feeUnits: number;
-  /** Latest per-unit market value; null if never priced. */
   unitValue: number | null;
   /** This year's Q1–Q4 per-unit values; null = no price that quarter. */
   quarterUnitValues: QuarterUnitValues;
@@ -33,9 +30,7 @@ export interface Single extends ItemBase {
   pokemon: string;
   setName: string;
   condition: string;
-  /** Optional trailing tag, e.g. "PULLED". Empty string if none. */
   extra: string;
-  /** "Pokémon - Set - Condition[ - extra]", for search and copy. */
   displayName: string;
 }
 
@@ -45,7 +40,6 @@ export interface SealedItem extends ItemBase {
   name: string;
   holdId: number;
   holdName: string;
-  /** Short Hold number (1, 2, …); null for Long Hold. */
   holdNumber: number | null;
   holdStatus: HoldStatus;
 }

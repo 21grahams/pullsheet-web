@@ -3,9 +3,7 @@ import { createContext, useContext } from 'react';
 
 export interface AuthContextValue {
   session: Session | null;
-  /** True until the saved session (if any) has been read on startup. */
   loading: boolean;
-  /** Resolves to an error message to show, or null on success. */
   signIn: (email: string, password: string) => Promise<string | null>;
   signOut: () => Promise<void>;
 }

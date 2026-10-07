@@ -28,7 +28,6 @@ export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <Box component="textarea" sx={{ ...inputSx, resize: 'vertical' }} {...props} />;
 }
 
-/** Text input that brings up the decimal keypad on phones. */
 export function MoneyInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <TextInput
@@ -90,7 +89,6 @@ const stepButtonSx = {
   '&:disabled': { color: tokens.text3, cursor: 'default' },
 } as const;
 
-/** The old app's − n + stepper. */
 export function Stepper({
   value,
   onChange,
@@ -147,7 +145,6 @@ export function Stepper({
   );
 }
 
-/** Two-option toggle (Long Hold / Current Short Hold). */
 export function Segmented<T extends string>({
   value,
   options,

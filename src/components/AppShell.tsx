@@ -9,7 +9,6 @@ import { ScrollTopButton } from './ScrollTopButton';
 import { TABS } from './tabs';
 import { Wordmark } from './Wordmark';
 
-/** Header + tab bar (sticky, like the old app) with the active tab's screen below. */
 export function AppShell() {
   const { pathname } = useLocation();
   const navigate = useNavigate();

@@ -118,7 +118,6 @@ function Group({ group, ...handlers }: { group: RetailerGroup } & CardHandlers) 
   );
 }
 
-/** The Retailer Accounts list inside Settings. */
 export function RetailerAccounts(handlers: CardHandlers) {
   const accounts = useAccounts();
   if (!accounts.data) {

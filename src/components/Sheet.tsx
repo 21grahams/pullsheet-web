@@ -8,18 +8,10 @@ interface SheetProps {
   title: string;
   subtitle?: ReactNode;
   children: ReactNode;
-  /** Buttons pinned under a divider, e.g. Cancel + the primary action. */
   footer?: ReactNode;
-  /** Why the primary action is disabled, shown above the buttons. */
   hint?: string | null;
 }
 
-/**
- * The bottom sheet every modal uses, matching the old app: slides up from the
- * bottom on every screen size, 600px max and centered on desktop, rounded top,
- * at most 92% of the screen tall, closes on tapping outside. The handle bar is
- * decorative (it never dragged in the old app either).
- */
 export function Sheet({ open, onClose, title, subtitle, children, footer, hint }: SheetProps) {
   // iOS scrolls the page under the sheet to make room for the keyboard and
   // never scrolls it back, so put the page back where it was on close.
@@ -94,7 +86,6 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, hint }
   );
 }
 
-/** A form field with the old app's small uppercase label above it. */
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <Box sx={{ mb: 1.75 }}>

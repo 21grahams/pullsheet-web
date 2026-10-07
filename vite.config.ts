@@ -3,15 +3,11 @@ import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// The URL path the app is served from. GitHub Pages serves this repo at
-// /pullsheet-web/; override with VITE_BASE (e.g. "/pullsheet/") if the app
-// ever takes over the old app's address at cutover.
+// GitHub Pages serves this repo at /pullsheet-web/; VITE_BASE overrides it.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const base = env.VITE_BASE || '/pullsheet-web/';
 
-  // Shown in Settings → About so you can tell which version a device runs.
-  // GITHUB_SHA is set by GitHub Actions; local builds show "dev".
   const version = (process.env.GITHUB_SHA ?? 'dev').slice(0, 7);
   const builtAt = new Date().toISOString();
 

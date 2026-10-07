@@ -1,5 +1,3 @@
-# Every push to main: lint, format check, typecheck, test, build, then
-# publish to GitHub Pages. If any check fails, nothing is deployed.
 name: Deploy
 
 on:

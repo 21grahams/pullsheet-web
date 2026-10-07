@@ -15,8 +15,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
       setLoading(false);
     });
-    // Fires on login, logout, token refresh, and when a session expires or
-    // is revoked (which sends the app back to the login screen).
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
     return () => data.subscription.unsubscribe();
   }, []);

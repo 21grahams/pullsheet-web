@@ -11,7 +11,6 @@ export interface QuarterTarget {
   name: string;
   quarter: 1 | 2 | 3 | 4;
   quantity: number;
-  /** That quarter's current per-unit value, if any. */
   unitValue: number | null;
 }
 

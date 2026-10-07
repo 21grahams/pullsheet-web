@@ -44,7 +44,6 @@ function parseMoney(text: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-/** The first problem to report, or null if the form can be saved. */
 export function validateItemForm(kind: ItemKind, v: ItemFormValues): string | null {
   if (kind === 'single') {
     if (!v.pokemon.trim()) return 'Enter a Pokémon';
@@ -59,7 +58,6 @@ export function validateItemForm(kind: ItemKind, v: ItemFormValues): string | nu
   return null;
 }
 
-/** The exact stored numbers behind an edit form, and how they were displayed. */
 export interface ItemFormOriginal {
   values: ItemFormValues;
   baseCost: number;

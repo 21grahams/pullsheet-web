@@ -1,6 +1,4 @@
-// The only module that talks to Supabase. Components and hooks call these
-// functions; nothing else imports the client. Each wraps one api_* database
-// function and converts its rows into the app's types.
+// The only module that talks to Supabase.
 
 import { supabase } from '../lib/supabase';
 import type {
@@ -13,7 +11,6 @@ import type {
   Summary,
 } from './types';
 
-/** A failed request, carrying the database's own message (shown in a snackbar). */
 export class ApiError extends Error {
   override name = 'ApiError';
 }

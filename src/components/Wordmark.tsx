@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import { fonts, tokens } from '../theme/tokens';
 
-/** "PullSheet by NotAStockGenius", as in the old app's header. */
 export function Wordmark() {
   return (
     <Box component="span" sx={{ display: 'inline-flex', alignItems: 'baseline', gap: 1 }}>

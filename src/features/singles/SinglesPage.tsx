@@ -22,7 +22,6 @@ import { RemoveItemDialog } from '../items/RemoveItemDialog';
 import { SellSheet, type SellTarget } from '../items/SellSheet';
 import { SinglesFilterSheet } from './SinglesFilterSheet';
 
-/** "Qty: 1 · 10/05/2026 · NM · [PULLED]" */
 function Subtitle({ single }: { single: Single }) {
   const parts = [`Qty: ${single.quantity}`, formatDate(single.purchaseDate), single.condition].filter(
     Boolean,
@@ -53,7 +52,6 @@ function Subtitle({ single }: { single: Single }) {
   );
 }
 
-/** "Marill – Southern Islands": the card title, and what the copy icon copies. */
 function cardTitle(single: Single): string {
   return single.setName ? `${single.pokemon} – ${single.setName}` : single.pokemon;
 }
@@ -117,7 +115,6 @@ export function SinglesPage() {
 
   return (
     <Box>
-      {/* Search + Filter */}
       <Box sx={{ display: 'flex', gap: 1, mb: 1.75 }}>
         <Box sx={{ position: 'relative', flex: 1 }}>
           <Box

@@ -1,5 +1,3 @@
-// The old app's :root design tokens, copied exactly from its index.html.
-// Everything visual derives from these.
 export const tokens = {
   bg: '#0E0F11',
   surface: '#16181C',

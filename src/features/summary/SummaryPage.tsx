@@ -7,9 +7,6 @@ import { formatMoney, formatRatioPct, formatSignedPct } from '../../lib/format';
 import { realizedProfitLabel, returnPct } from '../../lib/summaryLabels';
 import { fonts, tokens } from '../../theme/tokens';
 
-// Everything here is calculated by the database (api_get_summary); this
-// screen only lays it out, matching the old Summary tab.
-
 const signColor = (n: number) => (n >= 0 ? tokens.green : tokens.red);
 const GREEN_BORDER = 'rgba(52,199,123,0.3)';
 
@@ -58,7 +55,6 @@ function Row({
 
 const Rule = () => <Box sx={{ borderTop: `1px solid ${tokens.border}`, my: 1 }} />;
 
-/** Singles / Long Hold Sealed boxes. */
 function CategoryPanel({ title, box }: { title: string; box: SummaryBox }) {
   return (
     <Panel>
@@ -75,7 +71,6 @@ function CategoryPanel({ title, box }: { title: string; box: SummaryBox }) {
   );
 }
 
-/** A sold-price / profit / markup / margin box inside Realized Profit. */
 function PeriodBox({
   title,
   sales,
@@ -83,7 +78,6 @@ function PeriodBox({
 }: {
   title: string;
   sales: Omit<SalesBox, 'hasSales'>;
-  /** The Singles / Long Hold sales boxes: green border, and every row always shown. */
   highlight?: boolean;
 }) {
   const row = (label: string, value: string, color: string = tokens.text) => (
@@ -114,7 +108,7 @@ function PeriodBox({
       >
         {title}
       </Box>
-      {/* As in the old app, Short Hold boxes leave out zero sold price / markup / margin rows. */}
+      {/* Short Hold boxes leave out $0 rows; the two sales boxes always show all four (old-app behavior). */}
       {(highlight || sales.soldPrice !== 0) && row('Sold Price', formatMoney(sales.soldPrice))}
       {row('Profit', formatMoney(sales.profit), signColor(sales.profit))}
       {(highlight || sales.markup !== 0) && row('Markup', formatRatioPct(sales.markup))}
@@ -188,7 +182,6 @@ export function SummaryPage() {
           <PeriodBox title="Individual Card Sales" sales={s.singlesSales} highlight />
         )}
         {s.longHoldSales.hasSales && <PeriodBox title="Long Hold Sales" sales={s.longHoldSales} highlight />}
-        {/* Newest Short Hold first, matching the Sealed tab. */}
         {[...holds.data]
           .sort((a, b) => b.number - a.number)
           .map((h) => (

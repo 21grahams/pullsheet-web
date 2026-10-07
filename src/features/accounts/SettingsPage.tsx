@@ -20,7 +20,6 @@ function formatBuiltAt(iso: string): string {
   });
 }
 
-/** A Settings section with the old app's small uppercase label. */
 function Section({ label, action, children }: { label: string; action?: ReactNode; children: ReactNode }) {
   return (
     <Box sx={{ mb: 3 }}>
@@ -63,8 +62,6 @@ function Row({ children }: { children: ReactNode }) {
   );
 }
 
-// Same sections as the old app, with the "Google Sheets Connection" and
-// "How to Connect" boxes replaced by the logged-in account.
 export function SettingsPage() {
   const { session, signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);

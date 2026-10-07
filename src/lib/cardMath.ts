@@ -1,7 +1,4 @@
-// The numbers shown on each card, sealed group header and the Singles summary
-// strip, as pure functions so they can be tested in isolation. Formulas match
-// the old app exactly. Market values arrive PER UNIT from the API; costs
-// arrive as TOTALS.
+// Market values arrive PER UNIT from the API; costs arrive as TOTALS.
 
 import { formatMoney } from './format';
 
@@ -10,7 +7,6 @@ export type QuarterUnitValues = readonly [number | null, number | null, number |
 export interface PricedItem {
   quantity: number;
   totalCost: number;
-  /** Latest per-unit market value, or null if the item has never been priced. */
   unitValue: number | null;
 }
 
@@ -23,12 +19,9 @@ export interface CardNumbers {
   totalValue: number;
   gain: number;
   gainPct: number;
-  /** Value if sold at an 80% exit. */
   value80: number;
-  /** Profit/loss at that 80% value. */
   profit80: number;
   profit80Pct: number;
-  /** Drives the card's left border: green, red, or neutral at exactly zero. */
   tone: Tone;
 }
 
@@ -60,21 +53,15 @@ export function cardNumbers(item: PricedItem, opts: { fallbackToCost?: boolean }
 
 export interface QuarterBox {
   quarter: 1 | 2 | 3 | 4;
-  label: string; // "Q3 2026"
+  label: string;
   /** Total value that quarter (per-unit × quantity), or null for "—". */
   total: number | null;
-  /** Change vs cost (Q1) or vs the previous quarter; null when not shown. */
   delta: number | null;
   deltaLabel: 'vs cost' | 'vs prev Q';
-  /** The latest quarter with a value (highlighted, with a dot). */
   active: boolean;
 }
 
-/**
- * The Q1–Q4 boxes. `year` comes from the server (api_get_context), never the
- * device clock. As in the old app, a delta shows only when both this quarter
- * and its comparison point have a value.
- */
+/** `year` comes from the server (api_get_context), never the device clock. */
 export function quarterBoxes(
   unitValues: QuarterUnitValues,
   quantity: number,
@@ -99,7 +86,6 @@ export function quarterBoxes(
   });
 }
 
-/** "PAS Fees: $3.39 × 2 units", or just the total when unit count isn't set; null if no fees. */
 export function pasFeesLabel(fees: number, feeUnits: number): string | null {
   if (!fees) return null;
   if (feeUnits > 0) return `${formatMoney(fees / feeUnits)} × ${feeUnits} unit${feeUnits !== 1 ? 's' : ''}`;
@@ -115,7 +101,6 @@ export interface Totals {
   value80: number;
 }
 
-/** Sums for a list of items: the Singles summary strip and each sealed group header. */
 export function totals(items: readonly PricedItem[], opts: { fallbackToCost?: boolean } = {}): Totals {
   let units = 0;
   let totalCost = 0;
@@ -137,10 +122,6 @@ export function totals(items: readonly PricedItem[], opts: { fallbackToCost?: bo
   };
 }
 
-/**
- * The Singles strip's subtitle, as in the old app: "38 cards (35 entries)",
- * plus "of 40" while a search/filter is hiding some.
- */
 export function cardsLabel(
   shown: readonly { quantity: number }[],
   all: readonly { quantity: number }[],

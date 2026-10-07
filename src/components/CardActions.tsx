@@ -15,7 +15,6 @@ const STYLES: Record<Variant, object> = {
   danger: { backgroundColor: 'transparent', color: tokens.red, border: `1px solid ${tokens.red}` },
 };
 
-/** The small Edit / Mark Sold / Move / Remove buttons under a card. */
 export function CardButton({
   variant = 'secondary',
   onClick,
