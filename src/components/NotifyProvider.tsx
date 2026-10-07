@@ -25,7 +25,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
         autoHideDuration={toast?.kind === 'error' ? 5000 : 2500}
         onClose={(_, reason) => reason !== 'clickaway' && setToast(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        sx={{ bottom: 'calc(80px + env(safe-area-inset-bottom)) !important' }}
+        sx={{ bottom: 'calc(80px + var(--bottom-inset, env(safe-area-inset-bottom))) !important' }}
         message={toast?.message}
         slotProps={{
           content: {

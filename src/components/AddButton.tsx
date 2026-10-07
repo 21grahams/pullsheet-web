@@ -10,7 +10,7 @@ export function AddButton({ onClick, label }: { onClick: () => void; label: stri
       onClick={onClick}
       sx={{
         position: 'fixed',
-        bottom: 'calc(24px + env(safe-area-inset-bottom))',
+        bottom: 'calc(24px + var(--bottom-inset, env(safe-area-inset-bottom)))',
         right: 20,
         width: 52,
         height: 52,

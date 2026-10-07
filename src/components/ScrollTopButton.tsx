@@ -28,9 +28,8 @@ export function ScrollTopButton() {
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       sx={{
         position: 'fixed',
-        right: 20,
-        // Leaves room below for the + button.
-        bottom: 'calc(24px + 52px + 12px + env(safe-area-inset-bottom))',
+        left: 20,
+        bottom: 'calc(30px + var(--bottom-inset, env(safe-area-inset-bottom)))',
         width: 40,
         height: 40,
         borderRadius: '20px',

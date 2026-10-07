@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
 
 import { AppShell } from './components/AppShell';
-import { SettingsPage } from './features/accounts/SettingsPage';
+import { AccountsPage } from './features/accounts/AccountsPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RequireAuth } from './features/auth/RequireAuth';
 import { SealedPage } from './features/sealed/SealedPage';
@@ -23,7 +23,7 @@ export function App() {
         <Route path="/singles" element={<SinglesPage />} />
         <Route path="/sealed" element={<SealedPage />} />
         <Route path="/summary" element={<SummaryPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/accounts" element={<AccountsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

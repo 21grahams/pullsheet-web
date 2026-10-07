@@ -34,7 +34,8 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   start and get prices without a separate matching step.
 - **Profile avatar (higher priority).** Your own image on your profile, even with a single
   profile: nicer UI. Needs a Supabase Storage bucket for the image (small backend addition that
-  doesn't touch tables the old app uses) plus an upload/crop step and a spot to show it.
+  doesn't touch tables the old app uses) plus an upload/crop step. It lives in the avatar menu
+  ("Change photo") and replaces the initial in the top-right circle.
 - **Item photos (nice to have, after the avatar).** Optional photo per card/item: proof of
   condition, telling copies apart, a thumbnail in the list. Reuses the avatar's storage and upload
   pieces; photos are shrunk on the phone before upload (free tier is 1 GB; lists stay fast).
@@ -44,7 +45,11 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
 - **Collection profiles (nice to have, low priority).** Separate collections you switch between
   like Gmail accounts (Pokémon, shoes, handbags). Only really worth it once each collection can
   define its own fields (shoes have no set/grade), which is the heavy part: every table gets a
-  collection link, Summary and security rules go per collection. If it ever happens, it affects
+  collection link, Summary and security rules go per collection. The switcher goes in the avatar
+  menu (profiles listed Gmail-style, checkmark on the current one). If it ever happens, it affects
   the rename (a name that fits more than Pokémon).
-- **Face ID to reveal account details** (Swift app). The web app masks details behind a tap with
-  no password, since a password would add friction 20–30×/day; Face ID makes a real lock cheap.
+- **Swift app (later).** Mirrors the web app (old + new features) over the same `api_*`
+  functions. Follow Apple's Liquid Glass design (iOS 26+): the standard tab bar, navigation bars
+  and sheets get it automatically with the current SDK; use the glass effect for custom pieces
+  like the avatar button. Add Face ID to reveal account details (the web app masks them behind a
+  tap with no password, since a password would add friction 20–30×/day).
