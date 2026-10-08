@@ -15,8 +15,8 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   field can no longer write), add a database rule matching the app's: NM/LP/MP/HP/DMG, or
   PSA/BGS/CGC/SGC/TAG with a grade from 1 to 10 in half steps.
 - **Rename the app** (right after the quick fixes; before new features and any App Store/Swift
-  release). Name idea: "Pulled"; first decide Pokémon-only vs a broader name (see collection
-  profiles). Includes the
+  release). Name idea: "Pulled", but lean broader than Pokémon, since collections for other
+  hobbies and other users are a long-term goal (see Collections). Includes the
   custom domain, GitHub repo names, and tidying the Mac folders at the same time (`~/Pullsheet`
   vs `~/pullsheet-web`): moving the backend folder means updating the nightly backup job's paths,
   the practice setup, and Claude's per-project notes together.
@@ -42,12 +42,20 @@ Ideas agreed for **after** the new app matches the old one (parity first). Not s
   Decide what happens to photos when an item is sold or merged. Lighter alternative for Singles:
   official card art from a free card database (e.g. Pokémon TCG API) by Pokémon + set, with no
   uploads; set-name matching won't always work, and sealed has no equivalent.
-- **Collection profiles (nice to have, low priority).** Separate collections you switch between
-  like Gmail accounts (Pokémon, shoes, handbags). Only really worth it once each collection can
-  define its own fields (shoes have no set/grade), which is the heavy part: every table gets a
-  collection link, Summary and security rules go per collection. The switcher goes in the avatar
-  menu (profiles listed Gmail-style, checkmark on the current one). If it ever happens, it affects
-  the rename (a name that fits more than Pokémon).
+- **Collections (long-term; staged).** Goal: eventually a real product for other people; for
+  now the owner tracks only Pokémon but wants the ability to add more. Collections live under
+  one account (Gmail-style: graham.kirsh@ holds Pokémon, Shoes, Hats); a new email is an
+  entirely separate account. Design: the money engine (qty, dates, cost, fees, value, P&L,
+  quarters, Summary) stays fixed; each collection defines its own descriptive fields (label,
+  type: text/number/date/pick-from-list, order; add/remove like the Tag link), stored as field
+  definitions plus a flexible column per item. Autocomplete, search and filters work per field;
+  the condition picker becomes a pick-from-list field. Stages: (1) multiple collections for one
+  user with custom fields, switcher in the avatar menu (medium-heavy); (2) modules per
+  collection: Sealed optional, short/long holds optional within it, Accounts optional
+  (medium); (3) other users: onboarding questions, templates (Pokémon, Sneakers, Handbags…),
+  sign-ups with per-user data isolation, account deletion, privacy policy, App Store (heavy;
+  pairs with the rename and Swift). Meanwhile: keep new backend work (e.g. market values) tied to
+  the money engine, not to Pokémon fields.
 - **Swift app (later).** Mirrors the web app (old + new features) over the same `api_*`
   functions. Follow Apple's Liquid Glass design (iOS 26+): the standard tab bar, navigation bars
   and sheets get it automatically with the current SDK; use the glass effect for custom pieces
