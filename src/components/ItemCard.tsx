@@ -11,7 +11,9 @@ interface ItemCardProps {
   title: string;
   subtitle: ReactNode;
   copyText: string;
+  quantity: number;
   numbers: CardNumbers;
+  showExit: boolean;
   feesLabel: string | null;
   quarters?: QuarterBox[];
   onQuarterClick?: (q: QuarterBox) => void;
@@ -31,26 +33,8 @@ const metaLabel = {
   letterSpacing: '1px',
   textTransform: 'uppercase',
 } as const;
-const metaValue = { ...mono, fontSize: 12, color: tokens.text2, mt: '2px' } as const;
 const finePrint = { fontSize: 11, color: tokens.text3 } as const;
 const divider = { mt: 1.25, pt: 1.25, borderTop: `1px solid ${tokens.border}` } as const;
-
-function GainCell({ amount, pct }: { amount: number; pct: number }) {
-  return (
-    <Box
-      sx={{
-        ...mono,
-        fontSize: 13,
-        fontWeight: 500,
-        textAlign: 'right',
-        color: amount >= 0 ? tokens.green : tokens.red,
-      }}
-    >
-      {formatMoney(amount)}
-      <Box sx={{ fontSize: 11 }}>{formatSignedPct(pct)}</Box>
-    </Box>
-  );
-}
 
 function QuarterGrid({
   quarters,
@@ -110,17 +94,65 @@ function QuarterGrid({
   );
 }
 
+function Gain({ amount, pct }: { amount: number; pct?: number }) {
+  return (
+    <Box sx={{ ...mono, fontSize: 13, color: amount >= 0 ? tokens.green : tokens.red }}>
+      {formatMoney(amount)}
+      {pct != null && (
+        <Box component="span" sx={{ fontSize: 11 }}>
+          {' '}
+          {formatSignedPct(pct)}
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+function GainPill({ pct, tone, hasCost }: { pct: number; tone: CardNumbers['tone']; hasCost: boolean }) {
+  const color = BORDER[tone];
+
+  return (
+    <Box
+      sx={{
+        ...mono,
+        fontSize: 12,
+        color,
+        backgroundColor: tone === 'neutral' ? tokens.surface2 : `${color}1f`,
+        borderRadius: '6px',
+        px: 0.75,
+        py: '2px',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {tone === 'gain' ? '▲ ' : tone === 'loss' ? '▼ ' : ''}
+      {hasCost ? `${Math.abs(pct).toFixed(1)}%` : 'No cost'}
+    </Box>
+  );
+}
+
+const ledger = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr 1.3fr',
+  columnGap: 1.5,
+  alignItems: 'baseline',
+};
+const money = { ...mono, fontSize: 14, color: tokens.text } as const;
+const each = { ...mono, fontSize: 11, color: tokens.text3, mt: '2px' } as const;
+
 export function ItemCard({
   title,
   subtitle,
   copyText,
+  quantity,
   numbers,
+  showExit,
   feesLabel,
   quarters,
   onQuarterClick,
   actions,
 }: ItemCardProps) {
   const notify = useNotify();
+  const many = quantity > 1;
 
   async function copy() {
     try {
@@ -177,51 +209,43 @@ export function ItemCard({
           </Box>
           <Box sx={{ fontSize: 11, color: tokens.text3, mt: '2px' }}>{subtitle}</Box>
         </Box>
-        <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
-          <Box sx={{ ...mono, fontSize: 16, fontWeight: 500, color: tokens.gold }}>
-            {formatMoney(numbers.unitValue)}
-          </Box>
-          <Box sx={finePrint}>each</Box>
+        <Box sx={{ display: 'flex', gap: 0.75, flexShrink: 0 }}>
+          <GainPill pct={numbers.gainPct} tone={numbers.tone} hasCost={numbers.totalCost > 0} />
         </Box>
       </Box>
 
-      <Box sx={{ ...divider, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Box sx={metaLabel}>Total Cost</Box>
-            <Box sx={metaValue}>{formatMoney(numbers.totalCost)}</Box>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Box sx={metaLabel}>Total Value</Box>
-            <Box sx={metaValue}>{formatMoney(numbers.totalValue)}</Box>
-          </Box>
+      <Box sx={{ ...divider, ...ledger }}>
+        <Box sx={metaLabel}>Cost</Box>
+        <Box sx={metaLabel}>Market Value</Box>
+        <Box sx={metaLabel}>Gain</Box>
+        <Box sx={{ ...money, mt: 0.5 }}>{formatMoney(numbers.totalCost)}</Box>
+        <Box sx={{ ...money, mt: 0.5 }}>{formatMoney(numbers.totalValue)}</Box>
+        <Box sx={{ mt: 0.5 }}>
+          <Gain amount={numbers.gain} />
         </Box>
-        <GainCell amount={numbers.gain} pct={numbers.gainPct} />
+        {many && (
+          <>
+            <Box sx={each}>{formatMoney(numbers.unitCost)} ea</Box>
+            <Box sx={each}>{formatMoney(numbers.unitValue)} ea</Box>
+            <Box />
+          </>
+        )}
       </Box>
-      <Box sx={{ ...finePrint, mt: 0.75 }}>
-        Unit Cost {formatMoney(numbers.unitCost)} · Unit Price {formatMoney(numbers.unitValue)}
-      </Box>
-      {feesLabel && <Box sx={{ ...finePrint, mt: '2px' }}>PAS Fees: {feesLabel}</Box>}
+      {feesLabel && <Box sx={{ ...finePrint, mt: 0.75 }}>Includes PAS fees: {feesLabel}</Box>}
 
-      <Box
-        sx={{
-          ...divider,
-          borderTopStyle: 'dashed',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Box sx={metaLabel}>80% Total Value</Box>
-          <Box sx={{ ...metaValue, color: tokens.gold }}>{formatMoney(numbers.value80)}</Box>
+      {showExit && (
+        <Box sx={{ ...divider, borderTopStyle: 'dashed', ...ledger }}>
+          <Box sx={metaLabel}>At 80%</Box>
+          <Box sx={{ ...money, color: tokens.gold }}>{formatMoney(numbers.value80)}</Box>
+          <Gain amount={numbers.profit80} pct={numbers.totalCost > 0 ? numbers.profit80Pct : undefined} />
         </Box>
-        <GainCell amount={numbers.profit80} pct={numbers.profit80Pct} />
-      </Box>
+      )}
 
       {quarters && <QuarterGrid quarters={quarters} onQuarterClick={onQuarterClick} />}
 
-      {actions && <Box sx={{ display: 'flex', gap: 0.75, mt: 1.25, flexWrap: 'wrap' }}>{actions}</Box>}
+      {actions && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.75, mt: 1.25 }}>{actions}</Box>
+      )}
     </Box>
   );
 }

@@ -48,3 +48,6 @@ export function useStickyState<T>(key: string, initial: T, persist = false) {
 export function clearStickyMemory() {
   memory.clear();
 }
+
+/** Whether cards show their "At 80%" row; one setting for Singles and Sealed, kept on this device. */
+export const useShowExit = () => useStickyState('ui:show-exit', false, true);

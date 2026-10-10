@@ -70,6 +70,9 @@ export function AppShell() {
 
     return () => observer.disconnect();
   }, []);
+  useLayoutEffect(() => {
+    document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+  }, [headerHeight]);
 
   return (
     <Box sx={{ minHeight: '100dvh' }}>

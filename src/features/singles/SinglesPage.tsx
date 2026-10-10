@@ -3,15 +3,20 @@ import type { SinglesFilters } from '../../lib/singlesFilter';
 import type { QuarterTarget } from '../items/QuarterSheet';
 import type { SellTarget } from '../items/SellSheet';
 
+import DeleteOutline from '@mui/icons-material/DeleteOutlined';
+import EditOutlined from '@mui/icons-material/EditOutlined';
+import SellOutlined from '@mui/icons-material/SellOutlined';
 import { Box, Button } from '@mui/material';
 import { useMemo, useState } from 'react';
 
 import { AddButton } from '../../components/AddButton';
-import { CardButton } from '../../components/CardActions';
+import { ExitToggle } from '../../components/ExitToggle';
+import { IconAction } from '../../components/IconAction';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyCollection, EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
+import { StickyToolbar } from '../../components/StickyToolbar';
 import { useAppContext, useSingles } from '../../hooks/queries';
-import { useStickyState } from '../../hooks/useStickyState';
+import { useShowExit, useStickyState } from '../../hooks/useStickyState';
 import { cardNumbers, cardsLabel, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate, formatMoney, formatSignedPct } from '../../lib/format';
 import { activeFilterCount, emptyFilters, filterOptions, filterSingles } from '../../lib/singlesFilter';
@@ -23,9 +28,11 @@ import { SellSheet } from '../items/SellSheet';
 import { SinglesFilterSheet } from './SinglesFilterSheet';
 
 function Subtitle({ single }: { single: Single }) {
-  const parts = [`Qty: ${single.quantity}`, formatDate(single.purchaseDate), single.condition].filter(
-    Boolean,
-  );
+  const parts = [
+    single.quantity > 1 ? `Qty ${single.quantity}` : '',
+    formatDate(single.purchaseDate),
+    single.condition,
+  ].filter(Boolean);
 
   return (
     <>
@@ -93,6 +100,7 @@ export function SinglesPage() {
   const singles = useSingles();
   const context = useAppContext();
   const [search, setSearch] = useStickyState('ui:singles-search', '');
+  const [showExit, setShowExit] = useShowExit();
   const [filters, setFilters] = useStickyState<SinglesFilters>('ui:singles-filters', emptyFilters);
   const [filterOpen, setFilterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -117,7 +125,7 @@ export function SinglesPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', gap: 1, mb: 1.75 }}>
+      <StickyToolbar>
         <Box sx={{ position: 'relative', flex: 1 }}>
           <Box
             component="input"
@@ -199,7 +207,8 @@ export function SinglesPage() {
             </Box>
           )}
         </Box>
-      </Box>
+        <ExitToggle on={showExit} onToggle={() => setShowExit((v) => !v)} />
+      </StickyToolbar>
 
       {all.length === 0 ? (
         <EmptyCollection title="No singles yet" action="Add your first card" onAdd={() => setAddOpen(true)} />
@@ -241,6 +250,8 @@ export function SinglesPage() {
                 title={cardTitle(s)}
                 subtitle={<Subtitle single={s} />}
                 copyText={cardTitle(s)}
+                quantity={s.quantity}
+                showExit={showExit}
                 numbers={cardNumbers(s)}
                 feesLabel={pasFeesLabel(s.fees, s.feeUnits)}
                 quarters={quarterBoxes(s.quarterUnitValues, s.quantity, s.totalCost, context.data.year)}
@@ -255,9 +266,11 @@ export function SinglesPage() {
                 }
                 actions={
                   <>
-                    <CardButton onClick={() => setEditing(s)}>Edit</CardButton>
-                    <CardButton
-                      variant="green"
+                    <IconAction label="Edit" icon={<EditOutlined />} onClick={() => setEditing(s)} />
+                    <IconAction
+                      label="Mark Sold"
+                      icon={<SellOutlined />}
+                      tone="green"
                       onClick={() =>
                         setSelling({
                           kind: 'single',
@@ -267,12 +280,13 @@ export function SinglesPage() {
                           unitCost: cardNumbers(s).unitCost,
                         })
                       }
-                    >
-                      Mark Sold
-                    </CardButton>
-                    <CardButton variant="danger" onClick={() => setRemoving(s)}>
-                      Remove
-                    </CardButton>
+                    />
+                    <IconAction
+                      label="Remove"
+                      icon={<DeleteOutline />}
+                      tone="danger"
+                      onClick={() => setRemoving(s)}
+                    />
                   </>
                 }
               />

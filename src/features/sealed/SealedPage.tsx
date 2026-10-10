@@ -4,16 +4,24 @@ import type { QuarterTarget } from '../items/QuarterSheet';
 import type { SellTarget } from '../items/SellSheet';
 import type { CompleteTarget } from './CompleteHoldSheet';
 
+import DeleteOutline from '@mui/icons-material/DeleteOutlined';
+import EditOutlined from '@mui/icons-material/EditOutlined';
+import SellOutlined from '@mui/icons-material/SellOutlined';
+import SwapHorizOutlined from '@mui/icons-material/SwapHorizOutlined';
 import { Box } from '@mui/material';
 import { useMemo, useState } from 'react';
 
 import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { CollapseAllButton } from '../../components/CollapseAllButton';
+import { ExitToggle } from '../../components/ExitToggle';
+import { IconAction } from '../../components/IconAction';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyCollection, ErrorState, LoadingState } from '../../components/ListStates';
+import { StickyToolbar } from '../../components/StickyToolbar';
 import { useAppContext, useSealed } from '../../hooks/queries';
 import { useCollapsibleGroups } from '../../hooks/useCollapsibleGroups';
+import { useShowExit } from '../../hooks/useStickyState';
 import { cardNumbers, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary } from '../../lib/sealedGroups';
@@ -97,6 +105,7 @@ function GroupHeader({
 function SealedCard({
   item,
   year,
+  showExit,
   onEdit,
   onRemove,
   onQuarter,
@@ -105,6 +114,7 @@ function SealedCard({
 }: {
   item: SealedItem;
   year: number;
+  showExit: boolean;
   onEdit: () => void;
   onRemove: () => void;
   onQuarter: (quarter: 1 | 2 | 3 | 4) => void;
@@ -116,8 +126,12 @@ function SealedCard({
   return (
     <ItemCard
       title={item.name}
-      subtitle={[`Qty: ${item.quantity}`, formatDate(item.purchaseDate)].filter(Boolean).join(' · ')}
+      subtitle={[item.quantity > 1 ? `Qty ${item.quantity}` : '', formatDate(item.purchaseDate)]
+        .filter(Boolean)
+        .join(' · ')}
       copyText={item.name}
+      quantity={item.quantity}
+      showExit={showExit}
       // Short Hold items with no price show their cost as their value (old-app behavior).
       numbers={cardNumbers(item, { fallbackToCost: !isLong })}
       feesLabel={pasFeesLabel(item.fees, item.feeUnits)}
@@ -127,16 +141,12 @@ function SealedCard({
       onQuarterClick={isLong ? (q) => onQuarter(q.quarter) : undefined}
       actions={
         <>
-          <CardButton onClick={onEdit}>Edit</CardButton>
-          {isLong && (
-            <CardButton variant="green" onClick={onSell}>
-              Mark Sold
-            </CardButton>
+          <IconAction label="Edit" icon={<EditOutlined />} onClick={onEdit} />
+          {isLong && <IconAction label="Mark Sold" icon={<SellOutlined />} tone="green" onClick={onSell} />}
+          {item.holdStatus !== 'historical' && (
+            <IconAction label="Move" icon={<SwapHorizOutlined />} onClick={onMove} />
           )}
-          {item.holdStatus !== 'historical' && <CardButton onClick={onMove}>Move</CardButton>}
-          <CardButton variant="danger" onClick={onRemove}>
-            Remove
-          </CardButton>
+          <IconAction label="Remove" icon={<DeleteOutline />} tone="danger" onClick={onRemove} />
         </>
       }
     />
@@ -155,6 +165,7 @@ export function SealedPage() {
   const [completing, setCompleting] = useState<CompleteTarget | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
+  const [showExit, setShowExit] = useShowExit();
   const { isCollapsed, toggle, allCollapsed, toggleAll } = useCollapsibleGroups(
     'ui:sealed',
     groups.map((g) => g.holdId),
@@ -213,7 +224,10 @@ export function SealedPage() {
 
   return (
     <Box>
-      <CollapseAllButton allCollapsed={allCollapsed} onClick={toggleAll} />
+      <StickyToolbar justify="flex-end">
+        <ExitToggle on={showExit} onToggle={() => setShowExit((v) => !v)} />
+        <CollapseAllButton allCollapsed={allCollapsed} onClick={toggleAll} />
+      </StickyToolbar>
 
       {groups.map((group) => {
         const groupCollapsed = isCollapsed(group.holdId);
@@ -233,6 +247,7 @@ export function SealedPage() {
                     key={item.id}
                     item={item}
                     year={context.data.year}
+                    showExit={showExit}
                     onEdit={() => setEditing(item)}
                     onRemove={() => setRemoving(item)}
                     onMove={() => setMoving(item)}
