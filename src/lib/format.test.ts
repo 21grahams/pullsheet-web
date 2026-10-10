@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatDate, formatMoney, formatRatioPct, formatSignedPct } from './format';
+import { formatDate, formatGain, formatMoney, formatRatioPct, formatSignedPct, gainLabel } from './format';
 
 describe('formatMoney', () => {
   it('matches the old app', () => {
@@ -44,5 +44,15 @@ describe('formatDate', () => {
   it('is blank for missing dates', () => {
     expect(formatDate(null)).toBe('');
     expect(formatDate('')).toBe('');
+  });
+});
+
+describe('gainLabel / formatGain', () => {
+  it('says Loss for negative amounts and drops the sign', () => {
+    expect(gainLabel(-9.81)).toBe('Loss');
+    expect(gainLabel(-1, 'Gain at 80%')).toBe('Loss at 80%');
+    expect(gainLabel(0)).toBe('Gain');
+    expect(formatGain(-9.81)).toBe('$9.81');
+    expect(formatGain(6.13)).toBe('$6.13');
   });
 });

@@ -3,7 +3,7 @@ import type { CardNumbers, QuarterBox } from '../lib/cardMath';
 
 import { Box } from '@mui/material';
 
-import { formatMoney } from '../lib/format';
+import { formatGain, formatMoney, gainLabel } from '../lib/format';
 import { fonts, tokens } from '../theme/tokens';
 import { useNotify } from './notifyContext';
 
@@ -98,7 +98,7 @@ function QuarterGrid({
 function Gain({ amount }: { amount: number }) {
   return (
     <Box sx={{ ...mono, fontSize: 13, color: amount >= 0 ? tokens.green : tokens.red }}>
-      {formatMoney(amount)}
+      {formatGain(amount)}
     </Box>
   );
 }
@@ -214,7 +214,7 @@ export function ItemCard({
         <Box sx={{ ...metaLabel, ...(valuePct < 100 && { color: tokens.gold }) }}>
           {valuePct < 100 ? `Market @ ${valuePct}%` : 'Market Value'}
         </Box>
-        <Box sx={metaLabel}>Gain</Box>
+        <Box sx={metaLabel}>{gainLabel(numbers.gain)}</Box>
         <Box sx={{ ...money, mt: 0.5 }}>{formatMoney(numbers.totalCost)}</Box>
         <Box sx={{ ...money, mt: 0.5 }}>{formatMoney(numbers.totalValue)}</Box>
         <Box sx={{ mt: 0.5 }}>

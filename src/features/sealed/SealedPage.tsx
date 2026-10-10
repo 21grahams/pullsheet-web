@@ -8,11 +8,10 @@ import DeleteOutline from '@mui/icons-material/DeleteOutlined';
 import EditOutlined from '@mui/icons-material/EditOutlined';
 import SellOutlined from '@mui/icons-material/SellOutlined';
 import SwapHorizOutlined from '@mui/icons-material/SwapHorizOutlined';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import { useMemo, useState } from 'react';
 
 import { AddButton } from '../../components/AddButton';
-import { CardButton } from '../../components/CardActions';
 import { CollapseAllButton } from '../../components/CollapseAllButton';
 import { IconAction } from '../../components/IconAction';
 import { ItemCard } from '../../components/ItemCard';
@@ -37,13 +36,11 @@ function GroupHeader({
   group,
   collapsed,
   onToggle,
-  onComplete,
   valuePct,
 }: {
   group: SealedGroup;
   collapsed: boolean;
   onToggle: () => void;
-  onComplete: () => void;
   valuePct: number;
 }) {
   return (
@@ -82,13 +79,6 @@ function GroupHeader({
         {group.name}
       </Box>
       <Box sx={{ flex: 1, height: '1px', backgroundColor: tokens.border }} />
-      {group.status === 'current' && (
-        <Box onClick={(e) => e.stopPropagation()}>
-          <CardButton variant="green" onClick={onComplete}>
-            Complete ✓
-          </CardButton>
-        </Box>
-      )}
       <Box
         sx={{
           fontFamily: fonts.mono,
@@ -167,7 +157,9 @@ export function SealedPage() {
   const [completing, setCompleting] = useState<CompleteTarget | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
+  const currentGroup = groups.find((g) => g.status === 'current');
   const [valuePct, setValuePct] = useValuePercent();
+  const isPhone = useMediaQuery('(max-width:599.95px)', { noSsr: true });
   const { isCollapsed, toggle, allCollapsed, toggleAll } = useCollapsibleGroups(
     'ui:sealed',
     groups.map((g) => g.holdId),
@@ -227,8 +219,34 @@ export function SealedPage() {
   return (
     <Box>
       <StickyToolbar justify="flex-end">
+        {currentGroup && (
+          <Box
+            component="button"
+            type="button"
+            onClick={() =>
+              setCompleting({ holdName: currentGroup.name, spent: totals(currentGroup.items).totalCost })
+            }
+            sx={{
+              mr: 'auto',
+              backgroundColor: 'rgba(52,199,123,0.12)',
+              border: '1px solid rgba(52,199,123,0.25)',
+              color: tokens.green,
+              borderRadius: '10px',
+              px: 1.75,
+              py: 1.25,
+              fontSize: 14,
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {isPhone
+              ? `Complete #${currentGroup.items[0]?.holdNumber ?? ''} ✓`
+              : `Complete ${currentGroup.name} ✓`}
+          </Box>
+        )}
         <PercentPicker value={valuePct} onChange={setValuePct} />
-        <CollapseAllButton allCollapsed={allCollapsed} onClick={toggleAll} />
+        <CollapseAllButton allCollapsed={allCollapsed} onClick={toggleAll} short={isPhone} />
       </StickyToolbar>
 
       {groups.map((group) => {
@@ -241,7 +259,6 @@ export function SealedPage() {
               collapsed={groupCollapsed}
               onToggle={() => toggle(group.holdId)}
               valuePct={valuePct}
-              onComplete={() => setCompleting({ holdName: group.name, spent: totals(group.items).totalCost })}
             />
             {!groupCollapsed && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

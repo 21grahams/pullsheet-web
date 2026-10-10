@@ -4,8 +4,11 @@ import type { SalesBox, SummaryBox } from '../../api/types';
 import { Box } from '@mui/material';
 
 import { ErrorState, LoadingState } from '../../components/ListStates';
+import { PercentPicker } from '../../components/PercentPicker';
+import { StickyToolbar } from '../../components/StickyToolbar';
 import { useCompletedHolds, useSummary } from '../../hooks/queries';
-import { formatMoney, formatRatioPct, formatSignedPct } from '../../lib/format';
+import { useValuePercent } from '../../hooks/useStickyState';
+import { formatGain, formatMoney, formatRatioPct, formatSignedPct, gainLabel } from '../../lib/format';
 import { realizedProfitLabel, returnPct } from '../../lib/summaryLabels';
 import { fonts, tokens } from '../../theme/tokens';
 
@@ -28,11 +31,9 @@ function Panel({ children, borderColor = tokens.border }: { children: ReactNode;
   );
 }
 
-function Label({ children }: { children: ReactNode }) {
+function Label({ children, color = tokens.text3 }: { children: ReactNode; color?: string }) {
   return (
-    <Box
-      sx={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: tokens.text3, mb: 0.75 }}
-    >
+    <Box sx={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color, mb: 0.75 }}>
       {children}
     </Box>
   );
@@ -55,20 +56,27 @@ function Row({
   );
 }
 
-const Rule = () => <Box sx={{ borderTop: `1px solid ${tokens.border}`, my: 1 }} />;
+/** Market value at a chosen percentage, to the cent. */
+const atPct = (value: number, pct: number) => Math.round(value * pct) / 100;
 
-function CategoryPanel({ title, box }: { title: string; box: SummaryBox }) {
+function CategoryPanel({ title, box, pct }: { title: string; box: SummaryBox; pct: number }) {
+  const value = atPct(box.value, pct);
+  const gain = value - box.spent;
+  const whatIf = pct < 100;
+
   return (
     <Panel>
       <Label>{title}</Label>
-      <Box sx={{ fontFamily: fonts.mono, fontSize: 22, fontWeight: 500, mb: 1 }}>
-        {formatMoney(box.value)}
+      <Box sx={{ fontFamily: fonts.mono, fontSize: 22, fontWeight: 500 }}>{formatMoney(value)}</Box>
+      <Box sx={{ fontSize: 11, color: whatIf ? tokens.gold : tokens.text3, mb: 1 }}>
+        {whatIf ? `Market @ ${pct}%` : 'Market Value'}
       </Box>
-      <Row label="Spent" value={formatMoney(box.spent)} />
-      <Row label="Gain" value={formatMoney(box.gain)} color={signColor(box.gain)} />
-      <Row label="@80% Exit" value={formatMoney(box.exit80)} color={tokens.gold} />
-      <Rule />
-      <Row label="80% Profit" value={formatMoney(box.profit80)} color={signColor(box.profit80)} />
+      <Row label="Cost" value={formatMoney(box.spent)} />
+      <Row
+        label={gainLabel(gain, whatIf ? `Gain at ${pct}%` : 'Gain')}
+        value={formatGain(gain)}
+        color={signColor(gain)}
+      />
     </Panel>
   );
 }
@@ -123,6 +131,7 @@ function PeriodBox({
 export function SummaryPage() {
   const summary = useSummary();
   const holds = useCompletedHolds();
+  const [valuePct, setValuePct] = useValuePercent();
 
   if (!summary.data || !holds.data) {
     if (summary.isError) return <ErrorState error={summary.error} onRetry={() => summary.refetch()} />;
@@ -134,36 +143,32 @@ export function SummaryPage() {
   const s = summary.data;
   const p = s.portfolio;
   const cs = s.currentShort;
+  const portfolioGain = atPct(p.value, valuePct) - p.spent;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <StickyToolbar justify="flex-end">
+        <PercentPicker value={valuePct} onChange={setValuePct} />
+      </StickyToolbar>
       <Panel>
-        <Label>Portfolio Value — Singles + Long Hold</Label>
+        <Label color={valuePct < 100 ? tokens.gold : undefined}>
+          Portfolio Value{valuePct < 100 ? ` @ ${valuePct}%` : ''} — Singles + Long Hold
+        </Label>
         <Box sx={{ fontFamily: fonts.mono, fontSize: 32, fontWeight: 500, color: tokens.gold }}>
-          {formatMoney(p.value)}
+          {formatMoney(atPct(p.value, valuePct))}
         </Box>
         <Box sx={{ fontFamily: fonts.mono, fontSize: 11, color: tokens.text3, mt: '3px' }}>
-          Spent: {formatMoney(p.spent)} · Gain: {formatMoney(p.gain)} · Return:{' '}
-          {formatSignedPct(returnPct(p))} · 80% exit: {formatMoney(p.exit80)}
+          Cost: {formatMoney(p.spent)} · {gainLabel(portfolioGain)}: {formatGain(portfolioGain)} · Return:{' '}
+          {formatSignedPct(returnPct({ spent: p.spent, gain: portfolioGain }))}
         </Box>
       </Panel>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25 }}>
-        <CategoryPanel title="Singles" box={s.singles} />
-        <CategoryPanel title="Long Hold Sealed" box={s.longHold} />
+        <CategoryPanel title="Singles" box={s.singles} pct={valuePct} />
+        <CategoryPanel title="Long Hold Sealed" box={s.longHold} pct={valuePct} />
       </Box>
 
-      <Panel>
-        <Label>{cs.name ?? 'Current Short Hold'} — Tracking Only</Label>
-        <Box sx={{ mt: 1 }}>
-          <Row label="Market Value" value={formatMoney(cs.value)} />
-          <Row label="Spent" value={formatMoney(cs.spent)} />
-          <Row label="Unrealized Gain" value={formatMoney(cs.gain)} color={signColor(cs.gain)} />
-          <Row label="@80% Exit" value={formatMoney(cs.exit80)} color={tokens.gold} />
-          <Rule />
-          <Row label="80% Profit" value={formatMoney(cs.profit80)} color={signColor(cs.profit80)} />
-        </Box>
-      </Panel>
+      <CategoryPanel title={`${cs.name ?? 'Current Short Hold'} — Tracking Only`} box={cs} pct={valuePct} />
 
       <Panel borderColor={GREEN_BORDER}>
         <Label>{realizedProfitLabel(s)}</Label>

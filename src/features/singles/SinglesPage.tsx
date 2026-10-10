@@ -18,7 +18,7 @@ import { StickyToolbar } from '../../components/StickyToolbar';
 import { useAppContext, useSingles } from '../../hooks/queries';
 import { useStickyState, useValuePercent } from '../../hooks/useStickyState';
 import { cardNumbers, cardsLabel, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
-import { formatDate, formatMoney, formatSignedPct } from '../../lib/format';
+import { formatDate, formatGain, formatMoney, formatSignedPct, gainLabel } from '../../lib/format';
 import { activeFilterCount, emptyFilters, filterOptions, filterSingles } from '../../lib/singlesFilter';
 import { fonts, tokens } from '../../theme/tokens';
 import { ItemFormSheet } from '../items/ItemFormSheet';
@@ -233,15 +233,15 @@ export function SinglesPage() {
         <>
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25, mt: 1, mb: 2.5 }}>
             <SummaryTile
-              label={valuePct < 100 ? `Total Value @ ${valuePct}%` : 'Total Value'}
+              label={valuePct < 100 ? `Market @ ${valuePct}%` : 'Market Value'}
               labelColor={valuePct < 100 ? tokens.gold : undefined}
               value={formatMoney(sum.totalValue)}
               color={tokens.gold}
               sub={cardsLabel(shown, all)}
             />
             <SummaryTile
-              label="Unrealized Gain"
-              value={formatMoney(sum.gain)}
+              label={gainLabel(sum.gain)}
+              value={formatGain(sum.gain)}
               color={sum.gain >= 0 ? tokens.green : tokens.red}
               sub={`${formatSignedPct(sum.gainPct)} return`}
             />

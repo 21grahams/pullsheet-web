@@ -32,3 +32,10 @@ export function formatDate(isoDate: string | null | undefined): string {
 
   return y && m && d ? `${m}/${d}/${y}` : '';
 }
+
+/** "Gain" (or e.g. "Gain at 80%") becomes "Loss…" when the amount is negative. */
+export const gainLabel = (amount: number, label = 'Gain') =>
+  amount < 0 ? label.replace('Gain', 'Loss') : label;
+
+/** A gain or loss amount without its sign; the label and color already say which. */
+export const formatGain = (amount: number) => formatMoney(Math.abs(amount));
