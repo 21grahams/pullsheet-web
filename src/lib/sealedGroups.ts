@@ -29,7 +29,12 @@ export function groupSealed(items: readonly SealedItem[]): SealedGroup[] {
     .map((g) => ({ ...g, items: newestFirst(g.items) }));
 }
 
-export function groupSummary(group: SealedGroup): string {
+export function groupSummary(group: SealedGroup, valuePct = 100): string {
+  if (valuePct < 100) {
+    const t = totals(group.items, { valuePct });
+
+    return `${t.units} units · ${formatMoney(t.totalValue)} @${valuePct}%`;
+  }
   const t = totals(group.items);
   const base = `${t.units} units · ${formatMoney(t.totalValue)}`;
 

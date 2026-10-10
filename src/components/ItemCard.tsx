@@ -3,7 +3,7 @@ import type { CardNumbers, QuarterBox } from '../lib/cardMath';
 
 import { Box } from '@mui/material';
 
-import { formatMoney, formatSignedPct } from '../lib/format';
+import { formatMoney } from '../lib/format';
 import { fonts, tokens } from '../theme/tokens';
 import { useNotify } from './notifyContext';
 
@@ -13,7 +13,8 @@ interface ItemCardProps {
   copyText: string;
   quantity: number;
   numbers: CardNumbers;
-  showExit: boolean;
+  /** Market value is shown at this percentage; below 100 the column says so. */
+  valuePct: number;
   feesLabel: string | null;
   quarters?: QuarterBox[];
   onQuarterClick?: (q: QuarterBox) => void;
@@ -94,16 +95,10 @@ function QuarterGrid({
   );
 }
 
-function Gain({ amount, pct }: { amount: number; pct?: number }) {
+function Gain({ amount }: { amount: number }) {
   return (
     <Box sx={{ ...mono, fontSize: 13, color: amount >= 0 ? tokens.green : tokens.red }}>
       {formatMoney(amount)}
-      {pct != null && (
-        <Box component="span" sx={{ fontSize: 11 }}>
-          {' '}
-          {formatSignedPct(pct)}
-        </Box>
-      )}
     </Box>
   );
 }
@@ -145,7 +140,7 @@ export function ItemCard({
   copyText,
   quantity,
   numbers,
-  showExit,
+  valuePct,
   feesLabel,
   quarters,
   onQuarterClick,
@@ -216,7 +211,9 @@ export function ItemCard({
 
       <Box sx={{ ...divider, ...ledger }}>
         <Box sx={metaLabel}>Cost</Box>
-        <Box sx={metaLabel}>Market Value</Box>
+        <Box sx={{ ...metaLabel, ...(valuePct < 100 && { color: tokens.gold }) }}>
+          {valuePct < 100 ? `Market @ ${valuePct}%` : 'Market Value'}
+        </Box>
         <Box sx={metaLabel}>Gain</Box>
         <Box sx={{ ...money, mt: 0.5 }}>{formatMoney(numbers.totalCost)}</Box>
         <Box sx={{ ...money, mt: 0.5 }}>{formatMoney(numbers.totalValue)}</Box>
@@ -232,14 +229,6 @@ export function ItemCard({
         )}
       </Box>
       {feesLabel && <Box sx={{ ...finePrint, mt: 0.75 }}>Includes PAS fees: {feesLabel}</Box>}
-
-      {showExit && (
-        <Box sx={{ ...divider, borderTopStyle: 'dashed', ...ledger }}>
-          <Box sx={metaLabel}>At 80%</Box>
-          <Box sx={{ ...money, color: tokens.gold }}>{formatMoney(numbers.value80)}</Box>
-          <Gain amount={numbers.profit80} pct={numbers.totalCost > 0 ? numbers.profit80Pct : undefined} />
-        </Box>
-      )}
 
       {quarters && <QuarterGrid quarters={quarters} onQuarterClick={onQuarterClick} />}
 

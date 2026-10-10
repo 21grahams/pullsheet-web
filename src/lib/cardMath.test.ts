@@ -112,3 +112,19 @@ describe('totals and cardsLabel', () => {
     expect(cardsLabel([{ quantity: 1 }], [{ quantity: 1 }])).toBe('1 card');
   });
 });
+
+describe('cardNumbers at a chosen percentage', () => {
+  it('scales market value, gain and tone; cost stays the same', () => {
+    const n = cardNumbers({ quantity: 2, totalCost: 150, unitValue: 100 }, { valuePct: 70 });
+    expect(n.unitValue).toBe(70);
+    expect(n.totalValue).toBe(140);
+    expect(n.gain).toBe(-10);
+    expect(n.tone).toBe('loss');
+    expect(n.totalCost).toBe(150);
+  });
+  it('rounds the what-if price to the cent so Gain matches what is shown', () => {
+    const n = cardNumbers({ quantity: 1, totalCost: 17, unitValue: 14.39 }, { valuePct: 50 });
+    expect(n.unitValue).toBe(7.2);
+    expect(n.gain).toBeCloseTo(-9.8, 10);
+  });
+});

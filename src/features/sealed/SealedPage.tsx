@@ -14,14 +14,14 @@ import { useMemo, useState } from 'react';
 import { AddButton } from '../../components/AddButton';
 import { CardButton } from '../../components/CardActions';
 import { CollapseAllButton } from '../../components/CollapseAllButton';
-import { ExitToggle } from '../../components/ExitToggle';
 import { IconAction } from '../../components/IconAction';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyCollection, ErrorState, LoadingState } from '../../components/ListStates';
+import { PercentPicker } from '../../components/PercentPicker';
 import { StickyToolbar } from '../../components/StickyToolbar';
 import { useAppContext, useSealed } from '../../hooks/queries';
 import { useCollapsibleGroups } from '../../hooks/useCollapsibleGroups';
-import { useShowExit } from '../../hooks/useStickyState';
+import { useValuePercent } from '../../hooks/useStickyState';
 import { cardNumbers, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate } from '../../lib/format';
 import { groupSealed, groupSummary } from '../../lib/sealedGroups';
@@ -38,11 +38,13 @@ function GroupHeader({
   collapsed,
   onToggle,
   onComplete,
+  valuePct,
 }: {
   group: SealedGroup;
   collapsed: boolean;
   onToggle: () => void;
   onComplete: () => void;
+  valuePct: number;
 }) {
   return (
     <Box
@@ -96,7 +98,7 @@ function GroupHeader({
           whiteSpace: 'nowrap',
         }}
       >
-        {groupSummary(group)}
+        {groupSummary(group, valuePct)}
       </Box>
     </Box>
   );
@@ -105,7 +107,7 @@ function GroupHeader({
 function SealedCard({
   item,
   year,
-  showExit,
+  valuePct,
   onEdit,
   onRemove,
   onQuarter,
@@ -114,7 +116,7 @@ function SealedCard({
 }: {
   item: SealedItem;
   year: number;
-  showExit: boolean;
+  valuePct: number;
   onEdit: () => void;
   onRemove: () => void;
   onQuarter: (quarter: 1 | 2 | 3 | 4) => void;
@@ -131,9 +133,9 @@ function SealedCard({
         .join(' · ')}
       copyText={item.name}
       quantity={item.quantity}
-      showExit={showExit}
+      valuePct={valuePct}
       // Short Hold items with no price show their cost as their value (old-app behavior).
-      numbers={cardNumbers(item, { fallbackToCost: !isLong })}
+      numbers={cardNumbers(item, { fallbackToCost: !isLong, valuePct })}
       feesLabel={pasFeesLabel(item.fees, item.feeUnits)}
       quarters={
         isLong ? quarterBoxes(item.quarterUnitValues, item.quantity, item.totalCost, year) : undefined
@@ -165,7 +167,7 @@ export function SealedPage() {
   const [completing, setCompleting] = useState<CompleteTarget | null>(null);
 
   const groups = useMemo(() => groupSealed(sealed.data ?? []), [sealed.data]);
-  const [showExit, setShowExit] = useShowExit();
+  const [valuePct, setValuePct] = useValuePercent();
   const { isCollapsed, toggle, allCollapsed, toggleAll } = useCollapsibleGroups(
     'ui:sealed',
     groups.map((g) => g.holdId),
@@ -225,7 +227,7 @@ export function SealedPage() {
   return (
     <Box>
       <StickyToolbar justify="flex-end">
-        <ExitToggle on={showExit} onToggle={() => setShowExit((v) => !v)} />
+        <PercentPicker value={valuePct} onChange={setValuePct} />
         <CollapseAllButton allCollapsed={allCollapsed} onClick={toggleAll} />
       </StickyToolbar>
 
@@ -238,6 +240,7 @@ export function SealedPage() {
               group={group}
               collapsed={groupCollapsed}
               onToggle={() => toggle(group.holdId)}
+              valuePct={valuePct}
               onComplete={() => setCompleting({ holdName: group.name, spent: totals(group.items).totalCost })}
             />
             {!groupCollapsed && (
@@ -247,7 +250,7 @@ export function SealedPage() {
                     key={item.id}
                     item={item}
                     year={context.data.year}
-                    showExit={showExit}
+                    valuePct={valuePct}
                     onEdit={() => setEditing(item)}
                     onRemove={() => setRemoving(item)}
                     onMove={() => setMoving(item)}

@@ -29,10 +29,19 @@ export interface CardNumbers {
  * Short Hold items with no price yet fall back to their cost (the old app
  * showed "market = cost" for them), so pass `fallbackToCost` for those.
  */
-export function cardNumbers(item: PricedItem, opts: { fallbackToCost?: boolean } = {}): CardNumbers {
+interface ValueOptions {
+  fallbackToCost?: boolean;
+  /** Show market value at this percentage (a what-if exit); 100 = real market value. */
+  valuePct?: number;
+}
+
+export function cardNumbers(item: PricedItem, opts: ValueOptions = {}): CardNumbers {
   const { quantity, totalCost } = item;
   const unitCost = quantity > 0 ? totalCost / quantity : totalCost;
-  const unitValue = item.unitValue ?? (opts.fallbackToCost ? unitCost : 0);
+  const base = item.unitValue ?? (opts.fallbackToCost ? unitCost : 0);
+  const pct = opts.valuePct ?? 100;
+  // A what-if price is rounded to the cent first, so the card's columns add up exactly as shown.
+  const unitValue = pct === 100 ? base : Math.round(base * pct) / 100;
   const totalValue = unitValue * quantity;
   const gain = totalValue - totalCost;
   const value80 = totalValue * 0.8;
@@ -105,7 +114,7 @@ export interface Totals {
   value80: number;
 }
 
-export function totals(items: readonly PricedItem[], opts: { fallbackToCost?: boolean } = {}): Totals {
+export function totals(items: readonly PricedItem[], opts: ValueOptions = {}): Totals {
   let units = 0;
   let totalCost = 0;
   let totalValue = 0;

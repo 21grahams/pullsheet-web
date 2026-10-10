@@ -60,6 +60,11 @@ describe('groupSummary', () => {
     expect(groupSummary(long!)).toBe('7 units · $1,317.99 · $1,054.39 @80%');
   });
 
+  it('shows the chosen percentage instead when below 100%', () => {
+    const [long] = groupSealed([item({ quantity: 2, unitValue: 100 })]);
+    expect(groupSummary(long!, 70)).toBe('2 units · $140.00 @70%');
+  });
+
   it('shows units and value for Short Holds', () => {
     const [g] = groupSealed([short(1, 14, 'current', { quantity: 6, unitValue: 72.38 })]);
     expect(groupSummary(g!)).toBe('6 units · $434.28');

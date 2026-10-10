@@ -10,13 +10,13 @@ import { Box, Button } from '@mui/material';
 import { useMemo, useState } from 'react';
 
 import { AddButton } from '../../components/AddButton';
-import { ExitToggle } from '../../components/ExitToggle';
 import { IconAction } from '../../components/IconAction';
 import { ItemCard } from '../../components/ItemCard';
 import { EmptyCollection, EmptyState, ErrorState, LoadingState } from '../../components/ListStates';
+import { PercentPicker } from '../../components/PercentPicker';
 import { StickyToolbar } from '../../components/StickyToolbar';
 import { useAppContext, useSingles } from '../../hooks/queries';
-import { useShowExit, useStickyState } from '../../hooks/useStickyState';
+import { useStickyState, useValuePercent } from '../../hooks/useStickyState';
 import { cardNumbers, cardsLabel, pasFeesLabel, quarterBoxes, totals } from '../../lib/cardMath';
 import { formatDate, formatMoney, formatSignedPct } from '../../lib/format';
 import { activeFilterCount, emptyFilters, filterOptions, filterSingles } from '../../lib/singlesFilter';
@@ -69,11 +69,13 @@ function SummaryTile({
   value,
   color,
   sub,
+  labelColor = tokens.text3,
 }: {
   label: string;
   value: string;
   color: string;
   sub: string;
+  labelColor?: string;
 }) {
   return (
     <Box
@@ -86,7 +88,7 @@ function SummaryTile({
       }}
     >
       <Box
-        sx={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: tokens.text3, mb: 0.75 }}
+        sx={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: labelColor, mb: 0.75 }}
       >
         {label}
       </Box>
@@ -100,7 +102,7 @@ export function SinglesPage() {
   const singles = useSingles();
   const context = useAppContext();
   const [search, setSearch] = useStickyState('ui:singles-search', '');
-  const [showExit, setShowExit] = useShowExit();
+  const [valuePct, setValuePct] = useValuePercent();
   const [filters, setFilters] = useStickyState<SinglesFilters>('ui:singles-filters', emptyFilters);
   const [filterOpen, setFilterOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -121,7 +123,7 @@ export function SinglesPage() {
     return <LoadingState />;
   }
 
-  const sum = totals(shown);
+  const sum = totals(shown, { valuePct });
 
   return (
     <Box>
@@ -207,7 +209,7 @@ export function SinglesPage() {
             </Box>
           )}
         </Box>
-        <ExitToggle on={showExit} onToggle={() => setShowExit((v) => !v)} />
+        <PercentPicker value={valuePct} onChange={setValuePct} />
       </StickyToolbar>
 
       {all.length === 0 ? (
@@ -231,7 +233,8 @@ export function SinglesPage() {
         <>
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.25, mt: 1, mb: 2.5 }}>
             <SummaryTile
-              label="Total Value"
+              label={valuePct < 100 ? `Total Value @ ${valuePct}%` : 'Total Value'}
+              labelColor={valuePct < 100 ? tokens.gold : undefined}
               value={formatMoney(sum.totalValue)}
               color={tokens.gold}
               sub={cardsLabel(shown, all)}
@@ -251,8 +254,8 @@ export function SinglesPage() {
                 subtitle={<Subtitle single={s} />}
                 copyText={cardTitle(s)}
                 quantity={s.quantity}
-                showExit={showExit}
-                numbers={cardNumbers(s)}
+                valuePct={valuePct}
+                numbers={cardNumbers(s, { valuePct })}
                 feesLabel={pasFeesLabel(s.fees, s.feeUnits)}
                 quarters={quarterBoxes(s.quarterUnitValues, s.quantity, s.totalCost, context.data.year)}
                 onQuarterClick={(q) =>
